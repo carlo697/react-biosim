@@ -52,6 +52,10 @@ export default function SimulationCanvas({ className }: Props) {
     // Initialize world and start simulation
     world.initializeWorld(true);
     world.startRun();
+
+    return () => {
+      world.pause();
+    };
   });
 
   return <canvas className={className} ref={canvas}></canvas>;
