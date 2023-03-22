@@ -1,3 +1,16 @@
+const defaultColors = require("tailwindcss/colors");
+
+const colors = {
+  white: defaultColors.white,
+  black: defaultColors.black,
+  grey: {
+    light: "#d1d1d1",
+    mid: "#696969",
+    dark: "#1a1a1a",
+  },
+  transparent: defaultColors.transparent,
+};
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -6,6 +19,7 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    colors,
     extend: {},
   },
   plugins: [],
