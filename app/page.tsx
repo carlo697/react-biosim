@@ -1,5 +1,4 @@
-import PlayPauseButton from "@/components/simulation/PlayPauseButton";
-import RestartButton from "@/components/simulation/RestartButton";
+import ControlsFooter from "@/components/simulation/ControlsFooter";
 import SimulationCanvas from "@/components/simulation/SimulationCanvas";
 
 export default function Home() {
@@ -32,16 +31,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="sticky bottom-0 bg-grey-mid/80 shadow-sm backdrop-blur-sm">
-        <div className="section-container py-2 lg:py-5">
-          <div className="flex">
-            <div className="ml-auto flex gap-1">
-              <RestartButton />
-              <PlayPauseButton />
-            </div>
-          </div>
-        </div>
-      </div>
+      <ControlsFooter />
     </main>
   );
 }
