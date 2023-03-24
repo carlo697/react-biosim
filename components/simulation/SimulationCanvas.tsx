@@ -6,7 +6,9 @@ import InsideReproductionAreaSelection from "@/simulation/creature/selection/Ins
 import World from "@/simulation/world/World";
 import RectangleReproductionArea from "@/simulation/world/areas/reproduction/RectangleReproductionArea";
 import RectangleObject from "@/simulation/world/objects/RectangleObject";
-import React, { useEffect, useRef } from "react";
+import { useAtom } from "jotai";
+import React, { useEffect, useRef, useState } from "react";
+import { isPausedAtom, restartAtom } from "./store";
 
 interface Props {
   className?: string;
@@ -14,10 +16,15 @@ interface Props {
 
 export default function SimulationCanvas({ className }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  const [world, setWorld] = useState<World | null>(null);
+
+  const [shouldRestart, setShouldRestart] = useAtom(restartAtom);
+  const [isPaused] = useAtom(isPausedAtom);
 
   useEffect(() => {
     // Create world
     const world = new World(canvas.current, 100);
+    setWorld(world);
     const populationStrategy = new AsexualRandomPopulation();
     const selectionMethod = new InsideReproductionAreaSelection();
 
@@ -56,7 +63,36 @@ export default function SimulationCanvas({ className }: Props) {
     return () => {
       world.pause();
     };
-  });
+  }, []);
+
+  const restartSimulation = () => {
+    if (world) {
+      const isPaused = world.isPaused;
+      world.initializeWorld(true);
+      if (!isPaused) {
+        world.startRun();
+      }
+    }
+  };
+
+  // Restart the simulation
+  useEffect(() => {
+    if (shouldRestart) {
+      restartSimulation();
+      setShouldRestart(false);
+    }
+  }, [shouldRestart]);
+
+  // Pause the simulation
+  useEffect(() => {
+    if (world) {
+      if (isPaused) {
+        world.pause();
+      } else {
+        world.resume();
+      }
+    }
+  }, [isPaused]);
 
   return <canvas className={className} ref={canvas}></canvas>;
 }
