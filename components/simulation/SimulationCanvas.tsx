@@ -7,8 +7,8 @@ import World from "@/simulation/world/World";
 import RectangleReproductionArea from "@/simulation/world/areas/reproduction/RectangleReproductionArea";
 import RectangleObject from "@/simulation/world/objects/RectangleObject";
 import { useAtom } from "jotai";
-import React, { useEffect, useRef, useState } from "react";
-import { isPausedAtom, restartAtom } from "./store";
+import React, { useEffect, useRef } from "react";
+import { isPausedAtom, restartAtom, worldAtom } from "./store";
 
 interface Props {
   className?: string;
@@ -16,15 +16,16 @@ interface Props {
 
 export default function SimulationCanvas({ className }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [world, setWorld] = useState<World | null>(null);
+  const [world, setWorld] = useAtom(worldAtom);
 
   const [shouldRestart, setShouldRestart] = useAtom(restartAtom);
   const [isPaused] = useAtom(isPausedAtom);
 
   useEffect(() => {
-    // Create world
+    // Create world and store it
     const world = new World(canvas.current, 100);
     setWorld(world);
+
     const populationStrategy = new AsexualRandomPopulation();
     const selectionMethod = new InsideReproductionAreaSelection();
 
