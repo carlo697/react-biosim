@@ -19,7 +19,7 @@ type GridPoint = {
 type Grid = Array<Array<GridPoint>>;
 
 export default class World {
-  static instance: World;
+  static instance?: World;
 
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -69,12 +69,7 @@ export default class World {
   actions: CreatureActions = new CreatureActions();
 
   constructor(canvas: HTMLCanvasElement | null, size: number) {
-    if (World.instance) {
-      throw new Error("There's already a world created");
-    }
-
     if (canvas) {
-      World.instance = this;
       this.canvas = canvas;
       this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
       this.size = size;
