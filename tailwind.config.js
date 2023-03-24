@@ -8,6 +8,7 @@ const colors = {
     mid: "#696969",
     dark: "#1a1a1a",
   },
+  red: { DEFAULT: "#ab2f2f" },
   transparent: defaultColors.transparent,
 };
 
