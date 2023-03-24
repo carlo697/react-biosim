@@ -1,3 +1,4 @@
+import JotaiProvider from "@/components/providers/JotaiProvider";
 import "@/styles/globals.scss";
 
 export const metadata = {
@@ -12,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <JotaiProvider>{children}</JotaiProvider>
+      </body>
     </html>
   );
 }
