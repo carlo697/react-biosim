@@ -6,9 +6,20 @@ import InsideReproductionAreaSelection from "@/simulation/creature/selection/Ins
 import World from "@/simulation/world/World";
 import RectangleReproductionArea from "@/simulation/world/areas/reproduction/RectangleReproductionArea";
 import RectangleObject from "@/simulation/world/objects/RectangleObject";
-import { useAtom } from "jotai";
-import React, { useEffect, useRef } from "react";
-import { isPausedAtom, restartAtom, worldAtom } from "./store";
+import { useAtom, useSetAtom } from "jotai";
+import React, { useCallback, useEffect, useRef } from "react";
+import {
+  currentGenerationAtom,
+  isPausedAtom,
+  lastGenerationDurationAtom,
+  lastSurvivalRateAtom,
+  lastSurvivorCountAtom,
+  newPopulationCountAtom,
+  restartAtom,
+  totalTimeAtom,
+  worldAtom,
+} from "./store";
+import { WorldEvents } from "@/simulation/events/WorldEvents";
 
 interface Props {
   className?: string;
@@ -22,6 +33,7 @@ export default function SimulationCanvas({ className }: Props) {
   const [isPaused] = useAtom(isPausedAtom);
 
   useEffect(() => {
+    console.log("World instantiated");
     // Create world and store it
     const world = new World(canvas.current, 100);
     setWorld(world);
@@ -62,14 +74,61 @@ export default function SimulationCanvas({ className }: Props) {
     world.startRun();
 
     return () => {
+      console.log("World paused");
+      setWorld(null);
       world.pause();
     };
   }, []);
+
+  // Bind events
+  useEffect(() => {
+    if (world) {
+      world.events.addEventListener(
+        WorldEvents.startGeneration,
+        onStartGeneration
+      );
+
+      return () => {
+        world.events.removeEventListener(
+          WorldEvents.startGeneration,
+          onStartGeneration
+        );
+      };
+    }
+  }, [world]);
+
+  // Stats
+  const setCurrentGeneration = useSetAtom(currentGenerationAtom);
+  const setLastGenerationDuration = useSetAtom(lastGenerationDurationAtom);
+  const setTotalTime = useSetAtom(totalTimeAtom);
+  const setLastSurvivorCount = useSetAtom(lastSurvivorCountAtom);
+  const setNewPopulationCount = useSetAtom(newPopulationCountAtom);
+  const setLastSurvivalRate = useSetAtom(lastSurvivalRateAtom);
+
+  const onStartGeneration = useCallback(() => {
+    if (world) {
+      setCurrentGeneration(world.currentGen);
+      setLastGenerationDuration(world.lastGenerationDuration);
+      setTotalTime((value) => value + world.lastGenerationDuration);
+      setLastSurvivorCount(world.lastSurvivorsCount);
+      setLastSurvivalRate(world.lastSurvivalRate);
+      setNewPopulationCount(world.currentCreatures.length);
+    }
+  }, [world]);
 
   const restartSimulation = () => {
     if (world) {
       const isPaused = world.isPaused;
       world.initializeWorld(true);
+
+      // Restart stats
+      setCurrentGeneration(0);
+      setLastGenerationDuration(0);
+      setTotalTime(0);
+      setLastSurvivorCount(0);
+      setLastSurvivalRate(0);
+      setNewPopulationCount(0);
+
       if (!isPaused) {
         world.startRun();
       }

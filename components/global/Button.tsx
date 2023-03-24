@@ -12,7 +12,7 @@ export default function Button({
   ...rest
 }: Props) {
   const className = classNames(
-    "py-2 px-4 hover:brightness-90 rounded-md",
+    "py-1 px-3 lg:py-2 lg:px-4 text-sm lg:text-base hover:brightness-90 rounded-md",
     variant === "dark" && "bg-grey-dark text-white",
     variant === "danger" && "bg-red text-whitef"
   );
