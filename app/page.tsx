@@ -1,4 +1,4 @@
-import ControlsFooter from "@/components/simulation/ControlsFooter";
+import Footer from "@/components/simulation/footer/Footer";
 import SimulationCanvas from "@/components/simulation/SimulationCanvas";
 
 export default function Home() {
@@ -31,7 +31,7 @@ export default function Home() {
         </div>
       </div>
 
-      <ControlsFooter />
+      <Footer />
     </main>
   );
 }
