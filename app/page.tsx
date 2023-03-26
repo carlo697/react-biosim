@@ -1,3 +1,7 @@
+import Tab from "@/components/global/tabs/Tab";
+import TabList from "@/components/global/tabs/TabList";
+import TabPanel from "@/components/global/tabs/TabPanel";
+import Tabs from "@/components/global/tabs/Tabs";
 import Footer from "@/components/simulation/footer/Footer";
 import SimulationCanvas from "@/components/simulation/SimulationCanvas";
 
@@ -12,20 +16,31 @@ export default function Home() {
 
           <div className="grid gap-8 lg:grid-cols-2">
             <SimulationCanvas className="aspect-square w-full bg-grey-light" />
-            <div>
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab
-                voluptas, earum aperiam cumque ducimus repellat fuga labore
-                fugit assumenda numquam placeat temporibus vitae sit nihil quis
-                qui in aut eligendi?
-              </p>
 
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab
-                voluptas, earum aperiam cumque ducimus repellat fuga labore
-                fugit assumenda numquam placeat temporibus vitae sit nihil quis
-                qui in aut eligendi?
-              </p>
+            <div>
+              <Tabs>
+                <TabList>
+                  <Tab index={0}>Population</Tab>
+                  <Tab index={1}>About</Tab>
+                </TabList>
+
+                <TabPanel index={0}>
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                  Recusandae eligendi natus consectetur beatae ab doloremque
+                  repudiandae sint assumenda nesciunt consequuntur laudantium
+                  repellat vel esse asperiores facilis totam, a quia voluptate.
+                </TabPanel>
+
+                <TabPanel index={1}>
+                  Source code:{" "}
+                  <a
+                    href="https://github.com/carlo697/react-biosim"
+                    target="_blank"
+                  >
+                    https://github.com/carlo697/react-biosim
+                  </a>
+                </TabPanel>
+              </Tabs>
             </div>
           </div>
         </div>

@@ -2,12 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  a {
+    @apply underline underline-offset-2;
+  }
+}
+
 @layer utilities {
   .section-container {
     @apply container mx-auto px-4;
   }
 
   .flex-center {
-    @apply flex justify-center items-center;
+    @apply flex items-center justify-center;
   }
 }

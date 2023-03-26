@@ -59,7 +59,7 @@ export default function Footer() {
               <FooterSpeedControls />
             </div>
 
-            <div className="flex flex-col gap-1 sm:flex-row">
+            <div className="flex flex-col items-center gap-1 sm:flex-row">
               <RestartButton />
               <PlayPauseButton />
             </div>
