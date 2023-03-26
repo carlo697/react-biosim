@@ -4,6 +4,7 @@ import TabPanel from "@/components/global/tabs/TabPanel";
 import Tabs from "@/components/global/tabs/Tabs";
 import Footer from "@/components/simulation/footer/Footer";
 import SimulationCanvas from "@/components/simulation/SimulationCanvas";
+import PopulationPanel from "@/components/simulation/tabs/population/PopulationPanel";
 
 export default function Home() {
   return (
@@ -25,10 +26,7 @@ export default function Home() {
                 </TabList>
 
                 <TabPanel index={0}>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Recusandae eligendi natus consectetur beatae ab doloremque
-                  repudiandae sint assumenda nesciunt consequuntur laudantium
-                  repellat vel esse asperiores facilis totam, a quia voluptate.
+                  <PopulationPanel />
                 </TabPanel>
 
                 <TabPanel index={1}>
