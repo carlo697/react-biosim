@@ -6,15 +6,18 @@ import InsideReproductionAreaSelection from "@/simulation/creature/selection/Ins
 import World from "@/simulation/world/World";
 import RectangleReproductionArea from "@/simulation/world/areas/reproduction/RectangleReproductionArea";
 import RectangleObject from "@/simulation/world/objects/RectangleObject";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
   currentGenerationAtom,
+  immediateStepsAtom,
   isPausedAtom,
   lastGenerationDurationAtom,
   lastSurvivalRateAtom,
   lastSurvivorCountAtom,
   newPopulationCountAtom,
+  pauseBetweenGenerationsAtom,
+  pauseBetweenStepsAtom,
   restartAtom,
   totalTimeAtom,
   worldAtom,
@@ -32,14 +35,27 @@ export default function SimulationCanvas({ className }: Props) {
   const [shouldRestart, setShouldRestart] = useAtom(restartAtom);
   const [isPaused] = useAtom(isPausedAtom);
 
+  // Dinamic values
+  const pauseBetweenSteps = useAtomValue(pauseBetweenStepsAtom);
+  const pauseBetweenGenerations = useAtomValue(pauseBetweenGenerationsAtom);
+  const immediateSteps = useAtomValue(immediateStepsAtom);
+
+  // Keep the world synchronized with dinamic values
   useEffect(() => {
-    console.log("World instantiated");
+    if (world) world.timePerStep = pauseBetweenSteps;
+  }, [pauseBetweenSteps]);
+  useEffect(() => {
+    if (world) world.immediateSteps = immediateSteps;
+  }, [immediateSteps]);
+  useEffect(() => {
+    if (world) world.pauseBetweenGenerations = pauseBetweenGenerations;
+  }, [pauseBetweenGenerations]);
+
+  // Instantiate the world
+  useEffect(() => {
     // Create world and store it
     const world = new World(canvas.current, 100);
     setWorld(world);
-
-    const populationStrategy = new AsexualRandomPopulation();
-    const selectionMethod = new InsideReproductionAreaSelection();
 
     // A map divided in two sections by 5 squares and a reproduction zone in the center
     world.obstacles = [
@@ -53,28 +69,37 @@ export default function SimulationCanvas({ className }: Props) {
       new RectangleReproductionArea(world, 0.25, 0.25, 0.5, 0.5, true),
     ];
 
-    // Default values
+    // Default values (time)
+    world.timePerStep = pauseBetweenSteps;
+    world.immediateSteps = immediateSteps;
+    world.pauseBetweenGenerations = pauseBetweenGenerations;
+
+    // Default values (population)
     world.initialPopulation = 1000;
-    world.populationStrategy = populationStrategy;
-    world.selectionMethod = selectionMethod;
+    world.stepsPerGen = 300;
+    world.populationStrategy = new AsexualRandomPopulation();
+    world.selectionMethod = new InsideReproductionAreaSelection();
+
+    // Default values (neural networks)
     world.initialGenomeSize = 4;
     world.maxGenomeSize = 30;
     world.maxNumberNeurons = 15;
-    world.timePerStep = 0;
-    world.stepsPerGen = 300;
-    world.immediateSteps = 1;
+
+    // Default values (mutations)
+    world.mutationMode = MutationMode.wholeGene;
     world.mutationProbability = 0.05;
     world.geneInsertionDeletionProbability = 0.015;
     world.deletionRatio = 0.5;
-    world.mutationMode = MutationMode.wholeGene;
-    world.pauseBetweenGenerations = 0;
 
     // Initialize world and start simulation
     world.initializeWorld(true);
     world.startRun();
 
+    console.log("World instantiated");
+
     return () => {
-      console.log("World paused");
+      console.log("World destroyed");
+
       setWorld(null);
       world.pause();
     };
@@ -88,12 +113,11 @@ export default function SimulationCanvas({ className }: Props) {
         onStartGeneration
       );
 
-      return () => {
+      return () =>
         world.events.removeEventListener(
           WorldEvents.startGeneration,
           onStartGeneration
         );
-      };
     }
   }, [world]);
 
