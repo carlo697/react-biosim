@@ -10,6 +10,7 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
   currentGenerationAtom,
+  currentStepAtom,
   immediateStepsAtom,
   isPausedAtom,
   lastGenerationDurationAtom,
@@ -19,6 +20,7 @@ import {
   pauseBetweenGenerationsAtom,
   pauseBetweenStepsAtom,
   restartAtom,
+  stepsPerGenerationAtom,
   totalTimeAtom,
   worldAtom,
 } from "./store";
@@ -36,11 +38,15 @@ export default function SimulationCanvas({ className }: Props) {
   const [isPaused] = useAtom(isPausedAtom);
 
   // Dinamic values
+  const stepsPerGeneration = useAtomValue(stepsPerGenerationAtom);
   const pauseBetweenSteps = useAtomValue(pauseBetweenStepsAtom);
   const pauseBetweenGenerations = useAtomValue(pauseBetweenGenerationsAtom);
   const immediateSteps = useAtomValue(immediateStepsAtom);
 
   // Keep the world synchronized with dinamic values
+  useEffect(() => {
+    if (world) world.stepsPerGen = stepsPerGeneration;
+  }, [stepsPerGeneration]);
   useEffect(() => {
     if (world) world.timePerStep = pauseBetweenSteps;
   }, [pauseBetweenSteps]);
@@ -76,7 +82,7 @@ export default function SimulationCanvas({ className }: Props) {
 
     // Default values (population)
     world.initialPopulation = 1000;
-    world.stepsPerGen = 300;
+    world.stepsPerGen = stepsPerGeneration;
     world.populationStrategy = new AsexualRandomPopulation();
     world.selectionMethod = new InsideReproductionAreaSelection();
 
@@ -112,16 +118,20 @@ export default function SimulationCanvas({ className }: Props) {
         WorldEvents.startGeneration,
         onStartGeneration
       );
+      world.events.addEventListener(WorldEvents.startStep, onStartStep);
 
-      return () =>
+      return () => {
         world.events.removeEventListener(
           WorldEvents.startGeneration,
           onStartGeneration
         );
+        world.events.removeEventListener(WorldEvents.startStep, onStartStep);
+      };
     }
   }, [world]);
 
   // Stats
+  const setCurrentStep = useSetAtom(currentStepAtom);
   const setCurrentGeneration = useSetAtom(currentGenerationAtom);
   const setLastGenerationDuration = useSetAtom(lastGenerationDurationAtom);
   const setTotalTime = useSetAtom(totalTimeAtom);
@@ -140,12 +150,19 @@ export default function SimulationCanvas({ className }: Props) {
     }
   }, [world]);
 
+  const onStartStep = useCallback(() => {
+    if (world) {
+      setCurrentStep(world.currentStep);
+    }
+  }, [world]);
+
   const restartSimulation = () => {
     if (world) {
       const isPaused = world.isPaused;
       world.initializeWorld(true);
 
       // Restart stats
+      setCurrentStep(0);
       setCurrentGeneration(0);
       setLastGenerationDuration(0);
       setTotalTime(0);

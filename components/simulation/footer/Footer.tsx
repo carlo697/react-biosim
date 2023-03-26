@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import RestartButton from "../RestartButton";
 import PlayPauseButton from "../PlayPauseButton";
 import { useAtomValue } from "jotai";
-import { currentGenerationAtom } from "../store";
+import {
+  currentGenerationAtom,
+  currentStepAtom,
+  stepsPerGenerationAtom,
+} from "../store";
 import FooterStats from "./FooterStats";
 import { FooterSpeedControls } from "./FooterSpeedControls";
 import { FaChevronUp } from "react-icons/fa";
@@ -13,6 +17,8 @@ import classNames from "classnames";
 
 export default function Footer() {
   const [extended, setExtended] = useState(false);
+  const currentStep = useAtomValue(currentStepAtom);
+  const stepsPerGeneration = useAtomValue(stepsPerGenerationAtom);
   const currentGeneration = useAtomValue(currentGenerationAtom);
 
   return (
@@ -26,9 +32,24 @@ export default function Footer() {
         </button>
 
         <div className="flex items-center gap-2 sm:gap-10">
-          <div>
-            <span className="hidden lg:inline-block">Generation</span>{" "}
-            <strong>#{currentGeneration}</strong>
+          <div
+            className={classNames(
+              (stepsPerGeneration < 100 && "min-w-[40px]") ||
+                (stepsPerGeneration < 1000 && "min-w-[55px]") ||
+                (stepsPerGeneration < 10000 && "min-w-[70px]")
+            )}
+          >
+            <div className="flex gap-2">
+              <span className="hidden lg:inline-block">Generation</span>{" "}
+              <strong>#{currentGeneration}</strong>
+            </div>
+
+            <div className="flex gap-2 text-sm">
+              <span className="hidden grow lg:inline-block">Step</span>{" "}
+              <strong>
+                {currentStep}/{stepsPerGeneration}
+              </strong>
+            </div>
           </div>
 
           <FooterStats />

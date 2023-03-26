@@ -28,7 +28,7 @@ export default function Footer() {
   const waitMessage = "Wait...";
 
   return (
-    <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
+    <div className="flex flex-wrap lg:grid lg:grid-cols-2 gap-x-2 gap-y-1 text-xs">
       <div>
         <strong>Survivors: </strong>
         {lastSurvivorCount ? (
