@@ -1,6 +1,6 @@
-import { Network } from "../Network.js";
-import { NeuronType } from "../Neuron.js";
-import ForceGraph, { LinkDatum, Node } from "./ForceGraph.js";
+import { Network } from "../Network";
+import { NeuronType } from "../Neuron";
+import ForceGraph, { LinkDatum, Node } from "./ForceGraph";
 
 export const drawNeuronalNetwork = (
   network: Network,
