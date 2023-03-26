@@ -9,31 +9,27 @@ import {
   totalTimeAtom,
 } from "../store";
 
-export default function Footer() {
+export default function FooterStats() {
   const lastGenerationDuration = useAtomValue(lastGenerationDurationAtom);
   const totalTime = useAtomValue(totalTimeAtom);
   const lastSurvivorCount = useAtomValue(lastSurvivorCountAtom);
   const lastSurvivalRate = useAtomValue(lastSurvivalRateAtom);
 
   // Convert the survival rate from range [0, 1] to [0, 100]
-  const survivalRatePercentage = lastSurvivalRate * 100;
-  // Leave two decimals
-  const survivalRateFormatted = Math.round(survivalRatePercentage * 100) / 100;
+  const survivalRatePercentage = (lastSurvivalRate * 100).toFixed(2);
 
   // Conver the total time to minutes and
-  const totalTimeMinutes = totalTime / 1000 / 60;
-  // Leave two decimals
-  const totalTimeFormatted = Math.round(totalTimeMinutes * 100) / 100;
+  const totalTimeMinutes = (totalTime / 1000 / 60).toFixed(2);
 
   const waitMessage = "Wait...";
 
   return (
-    <div className="flex flex-wrap lg:grid lg:grid-cols-2 gap-x-2 gap-y-1 text-xs">
+    <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs lg:grid lg:grid-cols-2">
       <div>
         <strong>Survivors: </strong>
         {lastSurvivorCount ? (
           <span className="inline-block min-w-[80px]">
-            {lastSurvivorCount} ({survivalRateFormatted}%)
+            {lastSurvivorCount} ({survivalRatePercentage}%)
           </span>
         ) : (
           waitMessage
@@ -42,7 +38,7 @@ export default function Footer() {
 
       <div>
         <strong>Total time: </strong>
-        {totalTime ? <span>{totalTimeFormatted} min</span> : waitMessage}
+        {totalTime ? <span>{totalTimeMinutes} min</span> : waitMessage}
       </div>
 
       <div className="col-span-2">
