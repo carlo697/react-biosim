@@ -66,10 +66,18 @@ export default function PopulationPanel() {
     }
   }, [world]);
 
+  const totalAliveCreatures = world?.currentCreatures.length ?? 0;
+  const totalSpeciesAlive = species.length;
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="lg:text-lg">
-        <strong>Total species alive:</strong> {species.length}
+      <div>
+        <div className="lg:text-lg">
+          <strong>Total alive creatures:</strong> {totalAliveCreatures}
+        </div>
+        <div className="lg:text-lg">
+          <strong>Total species alive:</strong> {totalSpeciesAlive}
+        </div>
       </div>
 
       <div className="flex gap-4">
