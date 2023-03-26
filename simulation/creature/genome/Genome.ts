@@ -1,7 +1,8 @@
+import { numberToHexColor } from "./../../helpers/helpers";
 import {
   getRandomHexChar,
   numberToBitString,
-  numberToRGB,
+  numberToRGBColor,
   paddingLeft,
   probabilityToBool,
 } from "../../helpers/helpers";
@@ -185,17 +186,23 @@ export default class Genome {
     ];
   }
 
-  getColor(): string {
-    let sum = 0;
-
+  getColorNumber() {
     // We need to generate a number between 0 and 1777216 to create
     // a color from it
+    let sum = 0;
     const multiplier = 16777215 / (this.genes.length * maxGenNumber);
     for (let geneIdx = 0; geneIdx < this.genes.length; geneIdx++) {
       sum += this.genes[geneIdx] * multiplier;
     }
+    return sum;
+  }
 
-    return numberToRGB(sum);
+  getColor(): string {
+    return numberToRGBColor(this.getColorNumber());
+  }
+
+  getHexColor(): string {
+    return numberToHexColor(this.getColorNumber());
   }
 
   compare(genome: Genome): boolean {

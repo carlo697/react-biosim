@@ -11,11 +11,19 @@ export const numberToHexString = (value: number) => {
 };
 
 // https://stackoverflow.com/questions/29851873/convert-a-number-between-1-and-16777215-to-a-colour-value
-export const numberToRGB = (value: number) => {
+export const numberToRGBComponents = (value: number) => {
   const r = value & 0xff;
   const g = (value >> 8) & 0xff;
   const b = (value >> 16) & 0xff;
+  return [r, g, b];
+};
+export const numberToRGBColor = (value: number) => {
+  const [r, g, b] = numberToRGBComponents(value);
   return "rgb(" + r + "," + g + "," + b + ")";
+};
+export const numberToHexColor = (value: number) => {
+  const [r, g, b] = numberToRGBComponents(value);
+  return "#" + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
 };
 
 export const paddingLeft = (string: String, paddingValue: string) => {
