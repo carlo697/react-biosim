@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { Species } from "./Species";
 import { useWindowSize } from "react-use";
 import { drawCreatureNeuronalNetwork } from "@/simulation/creature/brain/Helpers/drawCreatureNeuronalNetwork";
+import CopyToClipboardTextarea from "@/components/global/inputs/CopyToClipboardTextarea";
 
 interface Props {
   species: Species[];
@@ -48,8 +49,8 @@ export default function SelectedSpeciesPanel({
   return (
     <>
       {selectedSpecies && world ? (
-        <>
-          <h3 className="mb-2 text-center text-2xl font-bold">
+        <div className="flex flex-col gap-3">
+          <h3 className="text-center text-2xl font-bold">
             Selected species{" "}
             <span
               className="text-shadow-sm inline-block p-1"
@@ -59,7 +60,7 @@ export default function SelectedSpeciesPanel({
             </span>
           </h3>
 
-          <div className="mb-2">
+          <div>
             {actualSelectedSpecies ? (
               <>
                 <div>
@@ -80,7 +81,30 @@ export default function SelectedSpeciesPanel({
             className="aspect-[5/4] w-full bg-white"
             ref={graphCanvas}
           ></canvas>
-        </>
+
+          <div>
+            <div>
+              <strong>Genome size:</strong>{" "}
+              {selectedSpecies.genome.genes.length}
+            </div>
+
+            <div>
+              <strong>Hexadecimal genome:</strong>
+              <br />
+              <CopyToClipboardTextarea
+                value={selectedSpecies.genome.toHexadecimalString()}
+              />
+            </div>
+
+            <div>
+              <strong>Binary genome:</strong>
+              <br />
+              <CopyToClipboardTextarea
+                value={selectedSpecies.genome.toBitString()}
+              />
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="flex max-w-md flex-col gap-6 text-lg">
           <p className="mb-2">
