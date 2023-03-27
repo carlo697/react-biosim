@@ -24,7 +24,7 @@ export default function CopyToClipboardTextarea({ children, ...rest }: Props) {
   };
 
   return (
-    <div className="relative flex">
+    <div className="relative">
       <TextareaAutosize
         className="word-spacing-md w-full resize-none bg-grey-mid p-3 text-xs"
         readOnly
@@ -36,7 +36,8 @@ export default function CopyToClipboardTextarea({ children, ...rest }: Props) {
       <button
         className={classNames(
           "m-1 aspect-square rounded-md bg-blue px-2 leading-none text-white",
-          "absolute right-0 top-0"
+          "absolute right-0 top-0",
+          "hover:brightness-75"
         )}
         onClick={handleClick}
       >
