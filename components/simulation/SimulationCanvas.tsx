@@ -12,10 +12,15 @@ import {
   currentGenerationAtom,
   currentStepAtom,
   immediateStepsAtom,
+  initialGenomeSizeAtom,
+  initialPopulationAtom,
   isPausedAtom,
   lastGenerationDurationAtom,
   lastSurvivalRateAtom,
   lastSurvivorCountAtom,
+  maxGenomeSizeAtom,
+  maxNeuronsAtom,
+  mutationModeAtom,
   newPopulationCountAtom,
   pauseBetweenGenerationsAtom,
   pauseBetweenStepsAtom,
@@ -23,6 +28,7 @@ import {
   stepsPerGenerationAtom,
   totalTimeAtom,
   worldAtom,
+  worldSizeAtom,
 } from "./store";
 import { WorldEvents } from "@/simulation/events/WorldEvents";
 
@@ -43,6 +49,14 @@ export default function SimulationCanvas({ className }: Props) {
   const pauseBetweenGenerations = useAtomValue(pauseBetweenGenerationsAtom);
   const immediateSteps = useAtomValue(immediateStepsAtom);
 
+  // Initial settings
+  const worldSize = useAtomValue(worldSizeAtom);
+  const initialPopulation = useAtomValue(initialPopulationAtom);
+  const initialGenomeSize = useAtomValue(initialGenomeSizeAtom);
+  const maxGenomeSize = useAtomValue(maxGenomeSizeAtom);
+  const maxNeurons = useAtomValue(maxNeuronsAtom);
+  const mutationMode = useAtomValue(mutationModeAtom);
+
   // Keep the world synchronized with dinamic values
   useEffect(() => {
     if (world) world.stepsPerGen = stepsPerGeneration;
@@ -57,23 +71,19 @@ export default function SimulationCanvas({ className }: Props) {
     if (world) world.pauseBetweenGenerations = pauseBetweenGenerations;
   }, [pauseBetweenGenerations]);
 
-  // Instantiate the world
-  useEffect(() => {
-    // Create world and store it
-    const world = new World(canvas.current, 100);
-    setWorld(world);
+  // Function to set initial values
+  const applyInitialValues = (world: World) => {
+    // Restart stats
+    setCurrentStep(0);
+    setCurrentGeneration(0);
+    setLastGenerationDuration(0);
+    setTotalTime(0);
+    setLastSurvivorCount(0);
+    setLastSurvivalRate(0);
+    setNewPopulationCount(0);
 
-    // A map divided in two sections by 5 squares and a reproduction zone in the center
-    world.obstacles = [
-      new RectangleObject(world, 0, 0, 0.2, 0.2),
-      new RectangleObject(world, 0.2, 0.2, 0.2, 0.2),
-      new RectangleObject(world, 0.4, 0.4, 0.2, 0.2),
-      new RectangleObject(world, 0.6, 0.6, 0.2, 0.2),
-      new RectangleObject(world, 0.8, 0.8, 0.2, 0.2),
-    ];
-    world.areas = [
-      new RectangleReproductionArea(world, 0.25, 0.25, 0.5, 0.5, true),
-    ];
+    // Default values (map)
+    world.size = worldSize;
 
     // Default values (time)
     world.timePerStep = pauseBetweenSteps;
@@ -81,21 +91,43 @@ export default function SimulationCanvas({ className }: Props) {
     world.pauseBetweenGenerations = pauseBetweenGenerations;
 
     // Default values (population)
-    world.initialPopulation = 1000;
+    world.initialPopulation = initialPopulation;
     world.stepsPerGen = stepsPerGeneration;
     world.populationStrategy = new AsexualRandomPopulation();
     world.selectionMethod = new InsideReproductionAreaSelection();
 
     // Default values (neural networks)
-    world.initialGenomeSize = 4;
-    world.maxGenomeSize = 30;
-    world.maxNumberNeurons = 15;
+    world.initialGenomeSize = initialGenomeSize;
+    world.maxGenomeSize = maxGenomeSize;
+    world.maxNumberNeurons = maxNeurons;
 
     // Default values (mutations)
-    world.mutationMode = MutationMode.wholeGene;
+    world.mutationMode = mutationMode;
     world.mutationProbability = 0.05;
     world.geneInsertionDeletionProbability = 0.015;
     world.deletionRatio = 0.5;
+  };
+
+  // Instantiate the world
+  useEffect(() => {
+    // Create world and store it
+    const world = new World(canvas.current, 100);
+    setWorld(world);
+
+    applyInitialValues(world);
+
+    // A map divided in two sections by 5 squares
+    world.obstacles = [
+      new RectangleObject(world, 0, 0, 0.2, 0.2),
+      new RectangleObject(world, 0.2, 0.2, 0.2, 0.2),
+      new RectangleObject(world, 0.4, 0.4, 0.2, 0.2),
+      new RectangleObject(world, 0.6, 0.6, 0.2, 0.2),
+      new RectangleObject(world, 0.8, 0.8, 0.2, 0.2),
+    ];
+    // A reproduction zone at the center
+    world.areas = [
+      new RectangleReproductionArea(world, 0.25, 0.25, 0.5, 0.5, true),
+    ];
 
     // Initialize world and start simulation
     world.initializeWorld(true);
@@ -159,16 +191,8 @@ export default function SimulationCanvas({ className }: Props) {
   const restartSimulation = () => {
     if (world) {
       const isPaused = world.isPaused;
+      applyInitialValues(world);
       world.initializeWorld(true);
-
-      // Restart stats
-      setCurrentStep(0);
-      setCurrentGeneration(0);
-      setLastGenerationDuration(0);
-      setTotalTime(0);
-      setLastSurvivorCount(0);
-      setLastSurvivalRate(0);
-      setNewPopulationCount(0);
 
       if (!isPaused) {
         world.startRun();

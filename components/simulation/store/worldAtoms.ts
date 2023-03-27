@@ -1,3 +1,4 @@
+import { MutationMode } from "@/simulation/creature/genome/MutationMode";
 import World from "@/simulation/world/World";
 import { atom } from "jotai";
 
@@ -19,3 +20,11 @@ export const totalTimeAtom = atom(0);
 export const lastSurvivorCountAtom = atom(0);
 export const lastSurvivalRateAtom = atom(0);
 export const newPopulationCountAtom = atom(0);
+
+// Initial settings
+export const worldSizeAtom = atom(100);
+export const initialPopulationAtom = atom(1000);
+export const initialGenomeSizeAtom = atom(4);
+export const maxGenomeSizeAtom = atom(30);
+export const maxNeuronsAtom = atom(15);
+export const mutationModeAtom = atom<MutationMode>(MutationMode.wholeGene);
