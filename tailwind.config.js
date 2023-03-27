@@ -9,6 +9,7 @@ const colors = {
     dark: "#1a1a1a",
   },
   red: { DEFAULT: "#ab2f2f" },
+  blue: { DEFAULT: "#1e3b95" },
   transparent: defaultColors.transparent,
 };
 
