@@ -8,12 +8,16 @@ import classNames from "classnames";
 import { Species } from "./Species";
 import SelectedSpecies from "./SelectedSpecies";
 import SpeciesButton from "./SpeciesButton";
+import Creature from "@/simulation/creature/Creature";
 
 export default function PopulationPanel() {
   const world = useAtomValue(worldAtom);
 
   const [species, setSpecies] = useState<Species[]>([]);
   const [selectedSpecies, setSelectedSpecies] = useState<Species | undefined>();
+  const [selectedCreature, setSelectedCreature] = useState<
+    Creature | undefined
+  >();
   const renderedSpecies = species.slice(0, 42);
 
   const onStartGeneration = useCallback(() => {
@@ -47,7 +51,56 @@ export default function PopulationPanel() {
     setSpecies(newSpecies);
   }, [world]);
 
-  // Bind events
+  const selectCreature = (creature: Creature | undefined) => {
+    if (creature) {
+      const newSelectedSpecies = species.find(
+        (species) =>
+          species.genomeKey === creature.genome.toDecimalString(false)
+      );
+
+      setSelectedSpecies(newSelectedSpecies);
+      setSelectedCreature(creature);
+    } else {
+      setSelectedSpecies(undefined);
+      setSelectedCreature(undefined);
+    }
+  };
+
+  const onClickCanvas = useCallback(
+    (e: MouseEvent) => {
+      if (world) {
+        // Get creature at the mouse coordinates
+        const [worldX, worldY] = world.mouseEventPosToWorld(e);
+        const creature = world.grid[worldX][worldY].creature;
+
+        if (creature) {
+          selectCreature(creature);
+        } else {
+          selectCreature(undefined);
+        }
+      }
+    },
+    [world, species]
+  );
+
+  const onMouseEnterCanvas = useCallback(() => {
+    if (world && world.isPaused) {
+      world.computeGrid();
+    }
+  }, [world]);
+
+  const onMouseMoveCanvas = useCallback(
+    (e: MouseEvent) => {
+      if (world && world.isPaused) {
+        const [worldX, worldY] = world.mouseEventPosToWorld(e);
+        world.redraw();
+        world.drawRectStroke(worldX, worldY, 1, 1, "rgba(0,0,0,0.5)", 1.5);
+      }
+    },
+    [world]
+  );
+
+  // Bind world events
   useEffect(() => {
     if (world) {
       onStartGeneration();
@@ -65,6 +118,21 @@ export default function PopulationPanel() {
       };
     }
   }, [world]);
+
+  // Bind canvas events
+  useEffect(() => {
+    if (world) {
+      world.canvas.addEventListener("click", onClickCanvas);
+      world.canvas.addEventListener("mouseenter", onMouseEnterCanvas);
+      world.canvas.addEventListener("mousemove", onMouseMoveCanvas);
+
+      return () => {
+        world.canvas.removeEventListener("click", onClickCanvas);
+        world.canvas.removeEventListener("mouseenter", onMouseEnterCanvas);
+        world.canvas.removeEventListener("mousemove", onMouseMoveCanvas);
+      };
+    }
+  }, [world, species]);
 
   const totalAliveCreatures = world?.currentCreatures.length ?? 0;
   const totalSpeciesAlive = species.length;
