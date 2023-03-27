@@ -51,20 +51,23 @@ export default function PopulationPanel() {
     setSpecies(newSpecies);
   }, [world]);
 
-  const selectCreature = (creature: Creature | undefined) => {
-    if (creature) {
-      const newSelectedSpecies = species.find(
-        (species) =>
-          species.genomeKey === creature.genome.toDecimalString(false)
-      );
+  const selectCreature = useCallback(
+    (creature: Creature | undefined) => {
+      if (creature) {
+        const newSelectedSpecies = species.find(
+          (species) =>
+            species.genomeKey === creature.genome.toDecimalString(false)
+        );
 
-      setSelectedSpecies(newSelectedSpecies);
-      setSelectedCreature(creature);
-    } else {
-      setSelectedSpecies(undefined);
-      setSelectedCreature(undefined);
-    }
-  };
+        setSelectedSpecies(newSelectedSpecies);
+        setSelectedCreature(creature);
+      } else {
+        setSelectedSpecies(undefined);
+        setSelectedCreature(undefined);
+      }
+    },
+    [species]
+  );
 
   const onClickCanvas = useCallback(
     (e: MouseEvent) => {
@@ -80,7 +83,7 @@ export default function PopulationPanel() {
         }
       }
     },
-    [world, species]
+    [world, selectCreature]
   );
 
   const onMouseEnterCanvas = useCallback(() => {
@@ -117,7 +120,7 @@ export default function PopulationPanel() {
         );
       };
     }
-  }, [world]);
+  }, [onStartGeneration, world]);
 
   // Bind canvas events
   useEffect(() => {
@@ -132,7 +135,7 @@ export default function PopulationPanel() {
         world.canvas.removeEventListener("mousemove", onMouseMoveCanvas);
       };
     }
-  }, [world, species]);
+  }, [world, species, onClickCanvas, onMouseEnterCanvas, onMouseMoveCanvas]);
 
   const totalAliveCreatures = world?.currentCreatures.length ?? 0;
   const totalSpeciesAlive = species.length;
@@ -159,7 +162,7 @@ export default function PopulationPanel() {
         <div
           className={classNames(
             "inline-grid shrink-0 overflow-y-auto pr-2 lg:grid-cols-2 2xl:grid-cols-3",
-            "max-h-[75vh] lg:max-h-[65vh]"
+            "h-fit max-h-[75vh] lg:max-h-[65vh]"
           )}
         >
           {renderedSpecies.map((species) => {

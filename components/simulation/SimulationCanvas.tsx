@@ -1,6 +1,5 @@
 "use client";
 
-import { MutationMode } from "@/simulation/creature/genome/MutationMode";
 import AsexualRandomPopulation from "@/simulation/creature/population/AsexualRandomPopulation";
 import InsideReproductionAreaSelection from "@/simulation/creature/selection/InsideReproductionAreaSelection";
 import World from "@/simulation/world/World";
@@ -61,60 +60,92 @@ export default function SimulationCanvas({ className }: Props) {
   const enabledSensors = useAtomValue(enabledSensorsAtom);
   const enabledActions = useAtomValue(enabledActionsAtom);
 
+  // Stats
+  const setCurrentStep = useSetAtom(currentStepAtom);
+  const setCurrentGeneration = useSetAtom(currentGenerationAtom);
+  const setLastGenerationDuration = useSetAtom(lastGenerationDurationAtom);
+  const setTotalTime = useSetAtom(totalTimeAtom);
+  const setLastSurvivorCount = useSetAtom(lastSurvivorCountAtom);
+  const setNewPopulationCount = useSetAtom(newPopulationCountAtom);
+  const setLastSurvivalRate = useSetAtom(lastSurvivalRateAtom);
+
   // Keep the world synchronized with dinamic values
   useEffect(() => {
     if (world) world.stepsPerGen = stepsPerGeneration;
-  }, [stepsPerGeneration]);
+  }, [world, stepsPerGeneration]);
   useEffect(() => {
     if (world) world.timePerStep = pauseBetweenSteps;
-  }, [pauseBetweenSteps]);
+  }, [world, pauseBetweenSteps]);
   useEffect(() => {
     if (world) world.immediateSteps = immediateSteps;
-  }, [immediateSteps]);
+  }, [world, immediateSteps]);
   useEffect(() => {
     if (world) world.pauseBetweenGenerations = pauseBetweenGenerations;
-  }, [pauseBetweenGenerations]);
+  }, [world, pauseBetweenGenerations]);
 
   // Function to set initial values
-  const applyInitialValues = (world: World) => {
-    // Restart stats
-    setCurrentStep(0);
-    setCurrentGeneration(0);
-    setLastGenerationDuration(0);
-    setTotalTime(0);
-    setLastSurvivorCount(0);
-    setLastSurvivalRate(0);
-    setNewPopulationCount(0);
+  const applyInitialValues = useCallback(
+    (world: World) => {
+      // Restart stats
+      setCurrentStep(0);
+      setCurrentGeneration(0);
+      setLastGenerationDuration(0);
+      setTotalTime(0);
+      setLastSurvivorCount(0);
+      setLastSurvivalRate(0);
+      setNewPopulationCount(0);
 
-    // Map
-    world.size = worldSize;
+      // Map
+      world.size = worldSize;
 
-    // Sensors and actions
-    world.sensors.loadFromList(enabledSensors);
-    world.actions.loadFromList(enabledActions);
+      // Sensors and actions
+      world.sensors.loadFromList(enabledSensors);
+      world.actions.loadFromList(enabledActions);
 
-    // Time
-    world.timePerStep = pauseBetweenSteps;
-    world.immediateSteps = immediateSteps;
-    world.pauseBetweenGenerations = pauseBetweenGenerations;
+      // Time
+      world.timePerStep = pauseBetweenSteps;
+      world.immediateSteps = immediateSteps;
+      world.pauseBetweenGenerations = pauseBetweenGenerations;
 
-    // Population
-    world.initialPopulation = initialPopulation;
-    world.stepsPerGen = stepsPerGeneration;
-    world.populationStrategy = new AsexualRandomPopulation();
-    world.selectionMethod = new InsideReproductionAreaSelection();
+      // Population
+      world.initialPopulation = initialPopulation;
+      world.stepsPerGen = stepsPerGeneration;
+      world.populationStrategy = new AsexualRandomPopulation();
+      world.selectionMethod = new InsideReproductionAreaSelection();
 
-    // Neural networks
-    world.initialGenomeSize = initialGenomeSize;
-    world.maxGenomeSize = maxGenomeSize;
-    world.maxNumberNeurons = maxNeurons;
+      // Neural networks
+      world.initialGenomeSize = initialGenomeSize;
+      world.maxGenomeSize = maxGenomeSize;
+      world.maxNumberNeurons = maxNeurons;
 
-    // Mutations
-    world.mutationMode = mutationMode;
-    world.mutationProbability = 0.05;
-    world.geneInsertionDeletionProbability = 0.015;
-    world.deletionRatio = 0.5;
-  };
+      // Mutations
+      world.mutationMode = mutationMode;
+      world.mutationProbability = 0.05;
+      world.geneInsertionDeletionProbability = 0.015;
+      world.deletionRatio = 0.5;
+    },
+    [
+      enabledActions,
+      enabledSensors,
+      immediateSteps,
+      initialGenomeSize,
+      initialPopulation,
+      maxGenomeSize,
+      maxNeurons,
+      mutationMode,
+      pauseBetweenGenerations,
+      pauseBetweenSteps,
+      setCurrentGeneration,
+      setCurrentStep,
+      setLastGenerationDuration,
+      setLastSurvivalRate,
+      setLastSurvivorCount,
+      setNewPopulationCount,
+      setTotalTime,
+      stepsPerGeneration,
+      worldSize,
+    ]
+  );
 
   // Instantiate the world
   useEffect(() => {
@@ -149,7 +180,33 @@ export default function SimulationCanvas({ className }: Props) {
       setWorld(null);
       world.pause();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onStartGeneration = useCallback(() => {
+    if (world) {
+      setCurrentGeneration(world.currentGen);
+      setLastGenerationDuration(world.lastGenerationDuration);
+      setTotalTime((value) => value + world.lastGenerationDuration);
+      setLastSurvivorCount(world.lastSurvivorsCount);
+      setLastSurvivalRate(world.lastSurvivalRate);
+      setNewPopulationCount(world.currentCreatures.length);
+    }
+  }, [
+    setCurrentGeneration,
+    setLastGenerationDuration,
+    setLastSurvivalRate,
+    setLastSurvivorCount,
+    setNewPopulationCount,
+    setTotalTime,
+    world,
+  ]);
+
+  const onStartStep = useCallback(() => {
+    if (world) {
+      setCurrentStep(world.currentStep);
+    }
+  }, [world, setCurrentStep]);
 
   // Bind events
   useEffect(() => {
@@ -168,35 +225,9 @@ export default function SimulationCanvas({ className }: Props) {
         world.events.removeEventListener(WorldEvents.startStep, onStartStep);
       };
     }
-  }, [world]);
+  }, [onStartGeneration, onStartStep, world]);
 
-  // Stats
-  const setCurrentStep = useSetAtom(currentStepAtom);
-  const setCurrentGeneration = useSetAtom(currentGenerationAtom);
-  const setLastGenerationDuration = useSetAtom(lastGenerationDurationAtom);
-  const setTotalTime = useSetAtom(totalTimeAtom);
-  const setLastSurvivorCount = useSetAtom(lastSurvivorCountAtom);
-  const setNewPopulationCount = useSetAtom(newPopulationCountAtom);
-  const setLastSurvivalRate = useSetAtom(lastSurvivalRateAtom);
-
-  const onStartGeneration = useCallback(() => {
-    if (world) {
-      setCurrentGeneration(world.currentGen);
-      setLastGenerationDuration(world.lastGenerationDuration);
-      setTotalTime((value) => value + world.lastGenerationDuration);
-      setLastSurvivorCount(world.lastSurvivorsCount);
-      setLastSurvivalRate(world.lastSurvivalRate);
-      setNewPopulationCount(world.currentCreatures.length);
-    }
-  }, [world]);
-
-  const onStartStep = useCallback(() => {
-    if (world) {
-      setCurrentStep(world.currentStep);
-    }
-  }, [world]);
-
-  const restartSimulation = () => {
+  const restartSimulation = useCallback(() => {
     if (world) {
       const isPaused = world.isPaused;
       applyInitialValues(world);
@@ -206,7 +237,7 @@ export default function SimulationCanvas({ className }: Props) {
         world.startRun();
       }
     }
-  };
+  }, [applyInitialValues, world]);
 
   // Restart the simulation
   useEffect(() => {
@@ -214,7 +245,7 @@ export default function SimulationCanvas({ className }: Props) {
       restartSimulation();
       setShouldRestart(false);
     }
-  }, [shouldRestart]);
+  }, [restartSimulation, setShouldRestart, shouldRestart]);
 
   // Pause the simulation
   useEffect(() => {
@@ -225,7 +256,7 @@ export default function SimulationCanvas({ className }: Props) {
         world.resume();
       }
     }
-  }, [isPaused]);
+  }, [world, isPaused]);
 
   return <canvas className={className} ref={canvas}></canvas>;
 }
