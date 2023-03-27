@@ -23,4 +23,14 @@
   .text-shadow-none {
     text-shadow: none;
   }
+
+  .word-spacing-sm {
+    word-spacing: 0.25rem;
+  }
+  .word-spacing-md {
+    word-spacing: 0.5rem;
+  }
+  .word-spacing-none {
+    word-spacing: 0rem;
+  }
 }
