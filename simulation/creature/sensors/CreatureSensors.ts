@@ -11,13 +11,28 @@ const adjacentTilesLookup: [number, number][] = [
   [-1, 0],
 ];
 
-export type SingleSensor = {
-  name: string;
+export type SensorName =
+  | "HorizontalPosition"
+  | "VerticalPosition"
+  | "Age"
+  | "Oscillator"
+  | "Random"
+  | "HorizontalSpeed"
+  | "VerticalSpeed"
+  | "HorizontalBorderDistance"
+  | "VerticalBorderDistance"
+  | "BorderDistance"
+  | "Touch"
+  | "Pain"
+  | "PopulationDensity";
+
+export type Sensor = {
+  name: SensorName;
   enabled: boolean;
   neuronCount: number;
 };
 
-export type Sensors = { [key: string]: SingleSensor };
+export type Sensors = Record<SensorName, Sensor>;
 
 export default class CreatureSensors {
   data: Sensors = {
@@ -90,8 +105,8 @@ export default class CreatureSensors {
 
   neuronsCount: number = 0;
 
-  loadFromList(names: string[]) {
-    for (const key of Object.keys(this.data)) {
+  loadFromList(names: SensorName[]) {
+    for (const key of Object.keys(this.data) as SensorName[]) {
       this.data[key].enabled = names.includes(key);
     }
 

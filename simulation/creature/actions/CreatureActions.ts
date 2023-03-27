@@ -1,11 +1,19 @@
 import Creature from "../Creature";
 
-type SingleAction = {
-  name: string;
+export type ActionName =
+  | "MoveNorth"
+  | "MoveSouth"
+  | "MoveEast"
+  | "MoveWest"
+  | "RandomMove"
+  | "MoveForward";
+
+export type Action = {
+  name: ActionName;
   enabled: boolean;
 };
 
-export type Actions = { [key: string]: SingleAction };
+export type Actions = Record<ActionName, Action>;
 
 export default class CreatureActions {
   data: Actions = {
@@ -38,7 +46,7 @@ export default class CreatureActions {
   neuronsCount: number = 0;
 
   loadFromList(names: string[]) {
-    for (const key of Object.keys(this.data)) {
+    for (const key of Object.keys(this.data) as ActionName[]) {
       this.data[key].enabled = names.includes(key);
     }
 
