@@ -11,6 +11,8 @@ import React, { useCallback, useEffect, useRef } from "react";
 import {
   currentGenerationAtom,
   currentStepAtom,
+  enabledActionsAtom,
+  enabledSensorsAtom,
   immediateStepsAtom,
   initialGenomeSizeAtom,
   initialPopulationAtom,
@@ -56,6 +58,8 @@ export default function SimulationCanvas({ className }: Props) {
   const maxGenomeSize = useAtomValue(maxGenomeSizeAtom);
   const maxNeurons = useAtomValue(maxNeuronsAtom);
   const mutationMode = useAtomValue(mutationModeAtom);
+  const enabledSensors = useAtomValue(enabledSensorsAtom);
+  const enabledActions = useAtomValue(enabledActionsAtom);
 
   // Keep the world synchronized with dinamic values
   useEffect(() => {
@@ -82,26 +86,30 @@ export default function SimulationCanvas({ className }: Props) {
     setLastSurvivalRate(0);
     setNewPopulationCount(0);
 
-    // Default values (map)
+    // Map
     world.size = worldSize;
 
-    // Default values (time)
+    // Sensors and actions
+    world.sensors.loadFromList(enabledSensors);
+    world.actions.loadFromList(enabledActions);
+
+    // Time
     world.timePerStep = pauseBetweenSteps;
     world.immediateSteps = immediateSteps;
     world.pauseBetweenGenerations = pauseBetweenGenerations;
 
-    // Default values (population)
+    // Population
     world.initialPopulation = initialPopulation;
     world.stepsPerGen = stepsPerGeneration;
     world.populationStrategy = new AsexualRandomPopulation();
     world.selectionMethod = new InsideReproductionAreaSelection();
 
-    // Default values (neural networks)
+    // Neural networks
     world.initialGenomeSize = initialGenomeSize;
     world.maxGenomeSize = maxGenomeSize;
     world.maxNumberNeurons = maxNeurons;
 
-    // Default values (mutations)
+    // Mutations
     world.mutationMode = mutationMode;
     world.mutationProbability = 0.05;
     world.geneInsertionDeletionProbability = 0.015;
