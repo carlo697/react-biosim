@@ -1,6 +1,6 @@
 import classNames from "classnames";
-import { useAtom } from "jotai";
-import { useContext } from "react";
+import { atom as newAtom, useAtom } from "jotai";
+import { useContext, useState } from "react";
 import { toggleGroupContext } from "./ToggleGroup";
 
 interface Props
@@ -9,10 +9,16 @@ interface Props
   value: any;
 }
 
-export default function Toggle({ children, className, value, ...rest }: Props) {
-  const { currentValueAtom } = useContext(toggleGroupContext);
-  const [currentValue, setCurrentValue] = useAtom(currentValueAtom);
-  const isActive = currentValue === value;
+export default function Toggle({
+  children,
+  className,
+  value: targetValue,
+  ...rest
+}: Props) {
+  const { atom, value, onChange } = useContext(toggleGroupContext);
+  const [defaultAtom] = useState(() => newAtom(""));
+  const [currentAtomValue, setAtomValue] = useAtom(atom ?? defaultAtom);
+  const isActive = (value ?? currentAtomValue) === targetValue;
 
   const finalClassName = classNames(
     "py-2 px-2 text-sm lg:text-sm !leading-none",
@@ -25,7 +31,11 @@ export default function Toggle({ children, className, value, ...rest }: Props) {
   );
 
   const handleClick = () => {
-    setCurrentValue(value);
+    if (onChange) {
+      onChange(targetValue);
+    } else {
+      setAtomValue(targetValue);
+    }
   };
 
   return (

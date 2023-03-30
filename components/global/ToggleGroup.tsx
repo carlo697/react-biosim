@@ -1,26 +1,34 @@
 import classNames from "classnames";
-import { Atom, WritableAtom, atom } from "jotai";
+import { Atom, PrimitiveAtom, WritableAtom, atom } from "jotai";
 import React from "react";
 import { createContext } from "react";
 
-type ToggleAtom = WritableAtom<any, any[], any>;
-
 interface Props extends React.ComponentPropsWithoutRef<"div"> {
-  atom: ToggleAtom;
+  atom?: PrimitiveAtom<any>;
+  value?: any;
+  onChange?: (checked: any) => void;
 }
 
 export const toggleGroupContext = createContext<{
-  currentValueAtom: ToggleAtom;
-}>({ currentValueAtom: atom(false) });
+  atom?: PrimitiveAtom<any>;
+  value?: any;
+  onChange?: (checked: any) => void;
+}>({ atom: atom(false) });
 
-export function ToggleGroup({ className, atom, ...rest }: Props) {
+export function ToggleGroup({
+  className,
+  atom,
+  value,
+  onChange,
+  ...rest
+}: Props) {
   const finalClassName = classNames(
     "inline-grid auto-cols-fr grid-flow-col",
     className
   );
 
   return (
-    <toggleGroupContext.Provider value={{ currentValueAtom: atom }}>
+    <toggleGroupContext.Provider value={{ atom: atom, value: value, onChange }}>
       <div className={finalClassName} {...rest}></div>
     </toggleGroupContext.Provider>
   );
