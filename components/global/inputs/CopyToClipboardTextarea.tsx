@@ -8,9 +8,15 @@ import TextareaAutosize, {
 interface Props
   extends PropsWithChildren,
     TextareaAutosizeProps,
-    React.RefAttributes<HTMLTextAreaElement> {}
+    React.RefAttributes<HTMLTextAreaElement> {
+  withScrollbar?: boolean;
+}
 
-export default function CopyToClipboardTextarea({ children, ...rest }: Props) {
+export default function CopyToClipboardTextarea({
+  children,
+  withScrollbar,
+  ...rest
+}: Props) {
   const textarea = useRef<HTMLTextAreaElement>(null);
 
   const handleClick = () => {
@@ -26,18 +32,20 @@ export default function CopyToClipboardTextarea({ children, ...rest }: Props) {
   return (
     <div className="relative">
       <TextareaAutosize
-        className="word-spacing-md w-full resize-none bg-grey-mid p-3 text-xs"
+        className={classNames(
+          "word-spacing-md w-full resize-none bg-grey-mid p-3 text-xs",
+          withScrollbar && "overflow-y-auto overflow-x-hidden"
+        )}
         readOnly
         ref={textarea}
         {...rest}
-      >
-        {children}
-      </TextareaAutosize>
+      />
       <button
         className={classNames(
           "m-1 aspect-square rounded-md bg-blue px-2 leading-none text-white",
           "absolute right-0 top-0",
-          "hover:brightness-75"
+          "hover:brightness-75",
+          withScrollbar && "right-5"
         )}
         onClick={handleClick}
       >
