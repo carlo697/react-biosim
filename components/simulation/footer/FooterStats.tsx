@@ -1,19 +1,22 @@
 "use client";
 
+import useWorldPropertyValue from "@/hooks/useWorldPropertyValue";
 import React from "react";
-import { useAtomValue } from "jotai";
-import {
-  lastGenerationDurationAtom,
-  lastSurvivalRateAtom,
-  lastSurvivorCountAtom,
-  totalTimeAtom,
-} from "../store";
 
 export default function FooterStats() {
-  const lastGenerationDuration = useAtomValue(lastGenerationDurationAtom);
-  const totalTime = useAtomValue(totalTimeAtom);
-  const lastSurvivorCount = useAtomValue(lastSurvivorCountAtom);
-  const lastSurvivalRate = useAtomValue(lastSurvivalRateAtom);
+  const lastGenerationDuration = useWorldPropertyValue(
+    (world) => world.lastGenerationDuration,
+    0
+  );
+  const totalTime = useWorldPropertyValue((world) => world.totalTime, 0);
+  const lastSurvivorCount = useWorldPropertyValue(
+    (world) => world.lastSurvivorsCount,
+    0
+  );
+  const lastSurvivalRate = useWorldPropertyValue(
+    (world) => world.lastSurvivalRate,
+    0
+  );
 
   // Convert the survival rate from range [0, 1] to [0, 100]
   const survivalRatePercentage = (lastSurvivalRate * 100).toFixed(2);

@@ -2,11 +2,20 @@
 
 import React from "react";
 import Button from "../global/Button";
-import { useAtom, useSetAtom } from "jotai";
-import { isPausedAtom } from "./store";
+import useWorldProperty from "@/hooks/useWorldProperty";
 
 export default function PlayPauseButton() {
-  const [isPaused, setIsPaused] = useAtom(isPausedAtom);
+  const [isPaused, setIsPaused] = useWorldProperty(
+    (world) => world.isPaused,
+    (world) => {
+      if (world.isPaused) {
+        world.resume();
+      } else {
+        world.pause();
+      }
+    },
+    false
+  );
 
   const handleClick = () => {
     setIsPaused(!isPaused);

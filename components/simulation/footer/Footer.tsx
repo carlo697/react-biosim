@@ -3,23 +3,19 @@
 import React, { useState } from "react";
 import RestartButton from "../RestartButton";
 import PlayPauseButton from "../PlayPauseButton";
-import { useAtomValue } from "jotai";
-import {
-  currentGenerationAtom,
-  currentStepAtom,
-  stepsPerGenerationAtom,
-} from "../store";
 import FooterStats from "./FooterStats";
 import { FooterSpeedControls } from "./FooterSpeedControls";
 import { FaChevronUp } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa";
 import classNames from "classnames";
+import useWorldPropertyValue from "@/hooks/useWorldPropertyValue";
 
 export default function Footer() {
   const [extended, setExtended] = useState(false);
-  const currentStep = useAtomValue(currentStepAtom);
-  const stepsPerGeneration = useAtomValue(stepsPerGenerationAtom);
-  const currentGeneration = useAtomValue(currentGenerationAtom);
+
+  const currentStep = useWorldPropertyValue((world) => world.currentStep, 0);
+  const currentGeneration = useWorldPropertyValue((world) => world.currentGen, 0);
+  const stepsPerGeneration = useWorldPropertyValue((world) => world.stepsPerGen, 0);
 
   return (
     <div className="sticky bottom-0 bg-grey-mid/80 shadow-sm backdrop-blur-sm">

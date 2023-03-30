@@ -5,33 +5,20 @@ import InsideReproductionAreaSelection from "@/simulation/creature/selection/Ins
 import World from "@/simulation/world/World";
 import RectangleReproductionArea from "@/simulation/world/areas/reproduction/RectangleReproductionArea";
 import RectangleObject from "@/simulation/world/objects/RectangleObject";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
-  currentGenerationAtom,
-  currentStepAtom,
   enabledActionsAtom,
   enabledSensorsAtom,
-  immediateStepsAtom,
   initialGenomeSizeAtom,
   initialPopulationAtom,
-  isPausedAtom,
-  lastGenerationDurationAtom,
-  lastSurvivalRateAtom,
-  lastSurvivorCountAtom,
   maxGenomeSizeAtom,
   maxNeuronsAtom,
   mutationModeAtom,
-  newPopulationCountAtom,
-  pauseBetweenGenerationsAtom,
-  pauseBetweenStepsAtom,
   restartAtom,
-  stepsPerGenerationAtom,
-  totalTimeAtom,
   worldAtom,
   worldSizeAtom,
 } from "./store";
-import { WorldEvents } from "@/simulation/events/WorldEvents";
 
 interface Props {
   className?: string;
@@ -42,13 +29,6 @@ export default function SimulationCanvas({ className }: Props) {
   const [world, setWorld] = useAtom(worldAtom);
 
   const [shouldRestart, setShouldRestart] = useAtom(restartAtom);
-  const [isPaused] = useAtom(isPausedAtom);
-
-  // Dinamic values
-  const stepsPerGeneration = useAtomValue(stepsPerGenerationAtom);
-  const pauseBetweenSteps = useAtomValue(pauseBetweenStepsAtom);
-  const pauseBetweenGenerations = useAtomValue(pauseBetweenGenerationsAtom);
-  const immediateSteps = useAtomValue(immediateStepsAtom);
 
   // Initial settings
   const worldSize = useAtomValue(worldSizeAtom);
@@ -60,41 +40,9 @@ export default function SimulationCanvas({ className }: Props) {
   const enabledSensors = useAtomValue(enabledSensorsAtom);
   const enabledActions = useAtomValue(enabledActionsAtom);
 
-  // Stats
-  const setCurrentStep = useSetAtom(currentStepAtom);
-  const setCurrentGeneration = useSetAtom(currentGenerationAtom);
-  const setLastGenerationDuration = useSetAtom(lastGenerationDurationAtom);
-  const setTotalTime = useSetAtom(totalTimeAtom);
-  const setLastSurvivorCount = useSetAtom(lastSurvivorCountAtom);
-  const setNewPopulationCount = useSetAtom(newPopulationCountAtom);
-  const setLastSurvivalRate = useSetAtom(lastSurvivalRateAtom);
-
-  // Keep the world synchronized with dinamic values
-  useEffect(() => {
-    if (world) world.stepsPerGen = stepsPerGeneration;
-  }, [world, stepsPerGeneration]);
-  useEffect(() => {
-    if (world) world.timePerStep = pauseBetweenSteps;
-  }, [world, pauseBetweenSteps]);
-  useEffect(() => {
-    if (world) world.immediateSteps = immediateSteps;
-  }, [world, immediateSteps]);
-  useEffect(() => {
-    if (world) world.pauseBetweenGenerations = pauseBetweenGenerations;
-  }, [world, pauseBetweenGenerations]);
-
   // Function to set initial values
   const applyInitialValues = useCallback(
     (world: World) => {
-      // Restart stats
-      setCurrentStep(0);
-      setCurrentGeneration(0);
-      setLastGenerationDuration(0);
-      setTotalTime(0);
-      setLastSurvivorCount(0);
-      setLastSurvivalRate(0);
-      setNewPopulationCount(0);
-
       // Map
       world.size = worldSize;
 
@@ -102,14 +50,8 @@ export default function SimulationCanvas({ className }: Props) {
       world.sensors.loadFromList(enabledSensors);
       world.actions.loadFromList(enabledActions);
 
-      // Time
-      world.timePerStep = pauseBetweenSteps;
-      world.immediateSteps = immediateSteps;
-      world.pauseBetweenGenerations = pauseBetweenGenerations;
-
       // Population
       world.initialPopulation = initialPopulation;
-      world.stepsPerGen = stepsPerGeneration;
       world.populationStrategy = new AsexualRandomPopulation();
       world.selectionMethod = new InsideReproductionAreaSelection();
 
@@ -127,22 +69,11 @@ export default function SimulationCanvas({ className }: Props) {
     [
       enabledActions,
       enabledSensors,
-      immediateSteps,
       initialGenomeSize,
       initialPopulation,
       maxGenomeSize,
       maxNeurons,
       mutationMode,
-      pauseBetweenGenerations,
-      pauseBetweenSteps,
-      setCurrentGeneration,
-      setCurrentStep,
-      setLastGenerationDuration,
-      setLastSurvivalRate,
-      setLastSurvivorCount,
-      setNewPopulationCount,
-      setTotalTime,
-      stepsPerGeneration,
       worldSize,
     ]
   );
@@ -183,50 +114,6 @@ export default function SimulationCanvas({ className }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onStartGeneration = useCallback(() => {
-    if (world) {
-      setCurrentGeneration(world.currentGen);
-      setLastGenerationDuration(world.lastGenerationDuration);
-      setTotalTime((value) => value + world.lastGenerationDuration);
-      setLastSurvivorCount(world.lastSurvivorsCount);
-      setLastSurvivalRate(world.lastSurvivalRate);
-      setNewPopulationCount(world.currentCreatures.length);
-    }
-  }, [
-    setCurrentGeneration,
-    setLastGenerationDuration,
-    setLastSurvivalRate,
-    setLastSurvivorCount,
-    setNewPopulationCount,
-    setTotalTime,
-    world,
-  ]);
-
-  const onStartStep = useCallback(() => {
-    if (world) {
-      setCurrentStep(world.currentStep);
-    }
-  }, [world, setCurrentStep]);
-
-  // Bind events
-  useEffect(() => {
-    if (world) {
-      world.events.addEventListener(
-        WorldEvents.startGeneration,
-        onStartGeneration
-      );
-      world.events.addEventListener(WorldEvents.startStep, onStartStep);
-
-      return () => {
-        world.events.removeEventListener(
-          WorldEvents.startGeneration,
-          onStartGeneration
-        );
-        world.events.removeEventListener(WorldEvents.startStep, onStartStep);
-      };
-    }
-  }, [onStartGeneration, onStartStep, world]);
-
   const restartSimulation = useCallback(() => {
     if (world) {
       const isPaused = world.isPaused;
@@ -246,17 +133,6 @@ export default function SimulationCanvas({ className }: Props) {
       setShouldRestart(false);
     }
   }, [restartSimulation, setShouldRestart, shouldRestart]);
-
-  // Pause the simulation
-  useEffect(() => {
-    if (world) {
-      if (isPaused) {
-        world.pause();
-      } else {
-        world.resume();
-      }
-    }
-  }, [world, isPaused]);
 
   return <canvas className={className} ref={canvas}></canvas>;
 }
