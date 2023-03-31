@@ -8,7 +8,8 @@ import { useInterval } from "react-use";
 
 export default function useWorldPropertyValue<T>(
   getter: (world: World) => T,
-  defaultValue: T
+  defaultValue: T,
+  compare?: (a: T, b: T) => boolean
 ) {
   const world = useAtomValue(worldAtom);
   const [value, setValue] = useState(() =>
@@ -16,7 +17,16 @@ export default function useWorldPropertyValue<T>(
   );
 
   useInterval(() => {
-    if (world) setValue(getter(world));
+    if (world) {
+      const newValue = getter(world);
+      if (compare) {
+        if (!compare(value, newValue)) {
+          setValue(newValue);
+        }
+      } else {
+        setValue(newValue);
+      }
+    }
   }, 20);
 
   return value;

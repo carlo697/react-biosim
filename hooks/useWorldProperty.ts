@@ -9,7 +9,8 @@ import { useInterval } from "react-use";
 export default function useWorldProperty<T>(
   getter: (world: World) => T,
   setter: (world: World, value: T) => void,
-  defaultValue: T
+  defaultValue: T,
+  compare?: (a: T, b: T) => boolean
 ): [T, (value: T) => void] {
   const world = useAtomValue(worldAtom);
   const [value, setValue] = useState(() =>
@@ -17,12 +18,24 @@ export default function useWorldProperty<T>(
   );
 
   useInterval(() => {
-    if (world) setValue(getter(world));
+    if (world) {
+      const newValue = getter(world);
+      if (compare) {
+        if (!compare(value, newValue)) {
+          setValue(newValue);
+        }
+      } else {
+        setValue(newValue);
+      }
+    }
   }, 20);
 
   const set = useCallback(
     (value: T) => {
-      if (world) setter(world, value);
+      if (world) {
+        setter(world, value);
+        setValue(value);
+      }
     },
     [setter, world]
   );
