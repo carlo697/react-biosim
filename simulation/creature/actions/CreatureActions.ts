@@ -45,6 +45,17 @@ export default class CreatureActions {
 
   neuronsCount: number = 0;
 
+  getList() {
+    const list: ActionName[] = [];
+    for (const key of Object.keys(this.data) as ActionName[]) {
+      const item = this.data[key];
+      if (item.enabled) {
+        list.push(item.name);
+      }
+    }
+    return list;
+  }
+
   loadFromList(names: string[]) {
     for (const key of Object.keys(this.data) as ActionName[]) {
       this.data[key].enabled = names.includes(key);

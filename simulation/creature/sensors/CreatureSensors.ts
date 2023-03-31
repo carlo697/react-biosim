@@ -105,6 +105,17 @@ export default class CreatureSensors {
 
   neuronsCount: number = 0;
 
+  getList() {
+    const list: SensorName[] = [];
+    for (const key of Object.keys(this.data) as SensorName[]) {
+      const item = this.data[key];
+      if (item.enabled) {
+        list.push(item.name);
+      }
+    }
+    return list;
+  }
+
   loadFromList(names: SensorName[]) {
     for (const key of Object.keys(this.data) as SensorName[]) {
       this.data[key].enabled = names.includes(key);
