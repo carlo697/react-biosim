@@ -23,6 +23,7 @@ import {
   Action,
   ActionName,
 } from "@/simulation/creature/actions/CreatureActions";
+import useSyncAtomWithWorldProperty from "@/hooks/useSyncAtomWithWorldProperty";
 
 export default function SettingsPanel() {
   const world = useAtomValue(worldAtom);
@@ -30,6 +31,35 @@ export default function SettingsPanel() {
   const [enabledActions, setEnabledActions] = useAtom(enabledActionsAtom);
   const sensors = Object.values(world?.sensors.data ?? {});
   const actions = Object.values(world?.actions.data ?? {});
+
+  useSyncAtomWithWorldProperty(worldSizeAtom, (world) => world.size);
+  useSyncAtomWithWorldProperty(
+    initialPopulationAtom,
+    (world) => world.initialPopulation
+  );
+  useSyncAtomWithWorldProperty(
+    initialGenomeSizeAtom,
+    (world) => world.initialGenomeSize
+  );
+  useSyncAtomWithWorldProperty(
+    maxGenomeSizeAtom,
+    (world) => world.maxGenomeSize
+  );
+  useSyncAtomWithWorldProperty(
+    maxNeuronsAtom,
+    (world) => world.maxNumberNeurons
+  );
+  useSyncAtomWithWorldProperty(mutationModeAtom, (world) => world.mutationMode);
+  useSyncAtomWithWorldProperty(
+    enabledSensorsAtom,
+    (world) => world.sensors.getList(),
+    (a, b) => JSON.stringify(a) === JSON.stringify(b)
+  );
+  useSyncAtomWithWorldProperty(
+    enabledActionsAtom,
+    (world) => world.actions.getList(),
+    (a, b) => JSON.stringify(a) === JSON.stringify(b)
+  );
 
   const handleSensorChange = (name: SensorName, checked: boolean) => {
     if (checked) {
