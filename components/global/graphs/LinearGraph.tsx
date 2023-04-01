@@ -45,6 +45,37 @@ export default function LinearGraph({
   const [mouseMovementX, setMouseMovementX] = useState(0);
   const [mouseLastX, setMouseLastX] = useState(0);
 
+  // Calculations for zoom
+  useEffect(() => {
+    const oldViewportWidth = zoomViewportWidth;
+    let newViewportWidth = 1 / zoomLevel;
+    const oldMouse = mouseNormalized * oldViewportWidth;
+    const newMouse = mouseNormalized * newViewportWidth;
+
+    const oldViewportLeft = zoomViewportLeft;
+    let newViewportLeft =
+      oldViewportLeft +
+      (oldViewportLeft + oldMouse - (oldViewportLeft + newMouse));
+
+    // Add mouse movement
+    newViewportLeft -= (mouseMovementX / absoluteGraphWidth) * newViewportWidth;
+    setMouseMovementX(0);
+
+    // Clamp values because of loss of precision on the results
+    newViewportLeft = clamp(newViewportLeft, 0, 1 - newViewportWidth);
+
+    // Set new values for viewport
+    setZoomViewportLeft(newViewportLeft);
+    setZoomViewportWidth(newViewportWidth);
+  }, [
+    absoluteGraphWidth,
+    mouseMovementX,
+    mouseNormalized,
+    zoomLevel,
+    zoomViewportLeft,
+    zoomViewportWidth,
+  ]);
+
   const getInterpolatedPointAt = useCallback(
     (points: any[], index: number): [number, number] => {
       // Position can be greater than (points.length - 1) (because of float
@@ -89,36 +120,12 @@ export default function LinearGraph({
 
       // Create new array
       const newPoints: number[] = [];
-
-      // Calculations for zoom
-      const oldViewportWidth = zoomViewportWidth;
-      let newViewportWidth = 1 / zoomLevel;
-      const oldMouse = mouseNormalized * oldViewportWidth;
-      const newMouse = mouseNormalized * newViewportWidth;
-
-      const oldViewportLeft = zoomViewportLeft;
-      let newViewportLeft =
-        oldViewportLeft +
-        (oldViewportLeft + oldMouse - (oldViewportLeft + newMouse));
-
-      // Add mouse movement
-      newViewportLeft -=
-        (mouseMovementX / absoluteGraphWidth) * newViewportWidth;
-      setMouseMovementX(0);
-
-      // Clamp values because of loss of precision on the results
-      newViewportLeft = clamp(newViewportLeft, 0, 1 - newViewportWidth);
-
-      // Set new values for viewport
-      setZoomViewportLeft(newViewportLeft);
-      setZoomViewportWidth(newViewportWidth);
-
       const offset = zoomViewportLeft * (points.length - 1);
 
       for (let index = 0; index < sampleSize; index++) {
         // This decimal value represents where this index
         // would lay on the original array
-        let position = offset + index * resizeFactor * newViewportWidth;
+        let position = offset + index * resizeFactor * zoomViewportWidth;
         // let position =
         //   offset +
         //   ((index / (sampleSize - 1)) * (points.length - 1)) / this.zoomLevel;
@@ -176,10 +183,7 @@ export default function LinearGraph({
       absoluteGraphWidth,
       resolution,
       zoomViewportWidth,
-      zoomLevel,
-      mouseNormalized,
       zoomViewportLeft,
-      mouseMovementX,
       getInterpolatedPointAt,
       smooth,
       smoothness,
