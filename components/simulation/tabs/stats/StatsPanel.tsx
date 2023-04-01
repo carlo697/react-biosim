@@ -42,12 +42,7 @@ export default function StatsPanel() {
 
   return (
     <div>
-      <LinearGraph
-        data={data}
-        getter={getter}
-        filter={false}
-        updateKey={updates}
-      />
+      <LinearGraph data={data} getter={getter} updateKey={updates} />
     </div>
   );
 }

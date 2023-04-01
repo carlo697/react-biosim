@@ -9,7 +9,8 @@ interface Props {
   getter: (point: any) => number;
   resolution?: number;
   margins?: { top: number; bottom: number; left: number; right: number };
-  filter?: boolean;
+  smooth?: boolean;
+  smoothness?: number;
   updateKey?: any;
 }
 
@@ -18,7 +19,8 @@ export default function LinearGraph({
   getter,
   resolution = 1,
   margins = { top: 20, bottom: 40, left: 20, right: 40 },
-  filter = true,
+  smooth = true,
+  smoothness = 10,
   updateKey,
 }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -61,7 +63,7 @@ export default function LinearGraph({
 
       // Get left and right points
       const leftPoint = getter(points[leftIndex]);
-      const rightPoint = getter(points[leftIndex]);
+      const rightPoint = getter(points[rightIndex]);
 
       // Interpolate the points
       const interpolatedIndex = lerp(leftIndex, rightIndex, atPoint);
@@ -83,11 +85,6 @@ export default function LinearGraph({
     } => {
       // Calculate the new size of array
       const sampleSize = Math.floor(absoluteGraphWidth / resolution);
-      console.log(sampleSize, absoluteGraphWidth);
-      console.log(
-        sampleSize,
-        (canvas.current?.width ?? 0) - margins.left - margins.right
-      );
       const resizeFactor = (points.length - 1) / (sampleSize - 1);
 
       // Create new array
@@ -128,8 +125,6 @@ export default function LinearGraph({
         newPoints[index] = getInterpolatedPointAt(points, position)[1];
       }
 
-      console.log(newPoints);
-
       // Record min and max values
       let minX = Number.MAX_VALUE;
       let maxX = Number.MIN_VALUE;
@@ -137,23 +132,26 @@ export default function LinearGraph({
       let maxY = Number.MIN_VALUE;
 
       // Apply mean filter
-      const filtering = 10;
       for (let index = 0; index < newPoints.length; index++) {
-        // Apply median filter
-        let count = 0;
-        let valueSum = 0;
-        for (
-          let j = Math.max(0, index - filtering);
-          j < Math.min(newPoints.length - 1, index + filtering);
-          j++
-        ) {
-          valueSum += newPoints[j];
-          count++;
-        }
+        let finalValue = newPoints[index];
+        if (smooth) {
+          // Apply median filter
+          let count = 0;
+          let valueSum = 0;
+          for (
+            let j = Math.max(0, index - smoothness);
+            j < Math.min(newPoints.length - 1, index + smoothness);
+            j++
+          ) {
+            valueSum += newPoints[j];
+            count++;
+          }
 
-        // Set new value
-        const finalValue = valueSum / count;
-        newPoints[index] = finalValue;
+          finalValue = valueSum / count;
+
+          // Set new value
+          newPoints[index] = finalValue;
+        }
 
         // Find min and max values
         if (index < minX) {
@@ -174,15 +172,15 @@ export default function LinearGraph({
     },
     [
       absoluteGraphWidth,
-      getInterpolatedPointAt,
-      margins.left,
-      margins.right,
-      mouseMovementX,
-      mouseNormalized,
       resolution,
-      zoomLevel,
-      zoomViewportLeft,
       zoomViewportWidth,
+      zoomLevel,
+      mouseNormalized,
+      zoomViewportLeft,
+      mouseMovementX,
+      getInterpolatedPointAt,
+      smooth,
+      smoothness,
     ]
   );
 
@@ -218,7 +216,6 @@ export default function LinearGraph({
         context.strokeStyle = "blue";
         // Get the points to render
         const { points, minX, maxX, minY, maxY } = getFilteredData(data);
-        console.log(points, minX, maxX, minY, maxY);
 
         // Function to get coordinates of point
         const dataToCanvasPoint = (index: number, value: number): number[] => {
