@@ -1,8 +1,6 @@
 import { clamp, interpolate, lerp } from "@/simulation/helpers/helpers";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useUpdate, useWindowSize } from "react-use";
-
-type getterFunc = (point: any) => number;
+import { useWindowSize } from "react-use";
 
 interface Props {
   data: any[];
@@ -24,20 +22,22 @@ export default function LinearGraph({
   updateKey,
 }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const update = useUpdate();
 
-  const absoluteGraphWidth =
-    (canvas.current ? canvas.current.width : 100) -
-    margins.left -
-    margins.right;
-  const absoluteGraphHeight =
-    (canvas.current ? canvas.current.height : 100) -
-    margins.top -
-    margins.bottom;
+  const canvasWidth = canvas.current ? canvas.current.width : 100;
+  const canvasHeight = canvas.current ? canvas.current.height : 100;
+
+  const absoluteGraphWidth = canvasWidth - margins.left - margins.right;
+  const absoluteGraphHeight = canvasHeight - margins.top - margins.bottom;
+
+  // Mouse
+  const [isMouseInsideGraph, setIsMouseInsideGraph] = useState(false);
+  const [isMouseInsideCanvas, setIsMouseInsideCanvas] = useState(false);
+  const [relativeMouseX, setRelativeMouseX] = useState(0);
+  const [relativeMouseY, setRelativeMouseY] = useState(0);
+  const [mouseNormalized, setMouseNormalized] = useState(0);
 
   // Zoom
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [mouseNormalized, setMouseNormalized] = useState(0);
   const [zoomViewportLeft, setZoomViewportLeft] = useState(0);
   const [zoomViewportWidth, setZoomViewportWidth] = useState(1);
 
@@ -102,7 +102,9 @@ export default function LinearGraph({
         (oldViewportLeft + oldMouse - (oldViewportLeft + newMouse));
 
       // Add mouse movement
-      newViewportLeft -= mouseMovementX * newViewportWidth;
+      newViewportLeft -=
+        (mouseMovementX / absoluteGraphWidth) * newViewportWidth;
+      setMouseMovementX(0);
 
       // Clamp values because of loss of precision on the results
       newViewportLeft = clamp(newViewportLeft, 0, 1 - newViewportWidth);
@@ -278,8 +280,105 @@ export default function LinearGraph({
     ]
   );
 
-  const { width } = useWindowSize();
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      if (isMouseInsideGraph) {
+        // Calculate normalized position
+        setMouseNormalized(
+          interpolate(
+            relativeMouseX,
+            margins.left,
+            canvasWidth - margins.right,
+            0,
+            1
+          )
+        );
 
+        // Calculate new zoom
+        let newZoom = zoomLevel;
+        if (e.deltaY > 0) {
+          newZoom /= 1.1;
+        } else {
+          newZoom *= 1.02;
+        }
+        newZoom = clamp(newZoom, 1, 1000);
+        setZoomLevel(newZoom);
+
+        e.preventDefault();
+      }
+    },
+    [
+      canvasWidth,
+      isMouseInsideGraph,
+      margins.left,
+      margins.right,
+      relativeMouseX,
+      zoomLevel,
+    ]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (canvas.current) {
+        const canvasRect = canvas.current.getBoundingClientRect();
+
+        // Calculate the mouse position relative to the canvas
+        const newRelativeMouseX = e.clientX - canvasRect.left;
+        const newRelativeMouseY = e.clientY - canvasRect.top;
+
+        // Check if the mouse is inside the graph
+        const newIsMouseInsideGraph =
+          newRelativeMouseX >= margins.left &&
+          newRelativeMouseX <= canvas.current.width - margins.right &&
+          newRelativeMouseY >= margins.top &&
+          newRelativeMouseY <= canvas.current.height - margins.bottom;
+
+        // Calculate the horizontal speed of the mouse when the user is clicking
+        if (e.buttons === 1 && newIsMouseInsideGraph) {
+          if (mouseLastX) {
+            setMouseMovementX(e.clientX - mouseLastX);
+          }
+          setMouseLastX(e.clientX);
+        } else {
+          setMouseMovementX(0);
+          setMouseLastX(0);
+        }
+
+        setRelativeMouseX(newRelativeMouseX);
+        setRelativeMouseY(newRelativeMouseY);
+        setIsMouseInsideGraph(newIsMouseInsideGraph);
+        setIsMouseInsideCanvas(true);
+      }
+    },
+    [margins.bottom, margins.left, margins.right, margins.top, mouseLastX]
+  );
+
+  const handleMouseLeave = () => {
+    setIsMouseInsideGraph(false);
+    setIsMouseInsideCanvas(false);
+    setMouseMovementX(0);
+    setMouseLastX(0);
+  };
+
+  // Bind mouse events to the canvas
+  useEffect(() => {
+    if (canvas.current) {
+      const actualCanvas = canvas.current;
+
+      actualCanvas.addEventListener("wheel", handleWheel);
+      actualCanvas.addEventListener("mousemove", handleMouseMove);
+      actualCanvas.addEventListener("mouseleave", handleMouseLeave);
+
+      return () => {
+        actualCanvas.removeEventListener("wheel", handleWheel);
+        actualCanvas.removeEventListener("mousemove", handleMouseMove);
+        actualCanvas.removeEventListener("mouseleave", handleMouseLeave);
+      };
+    }
+  }, [handleMouseMove, handleWheel]);
+
+  // Update the graph when the window resizes
+  const { width } = useWindowSize();
   useEffect(() => {
     if (canvas.current) drawGraph(canvas.current);
   }, [drawGraph, width, updateKey]);
