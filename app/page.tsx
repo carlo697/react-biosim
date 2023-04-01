@@ -8,6 +8,7 @@ import LoadPanel from "@/components/simulation/tabs/load/LoadPanel";
 import PopulationPanel from "@/components/simulation/tabs/population/PopulationPanel";
 import SavePanel from "@/components/simulation/tabs/save/SavePanel";
 import SettingsPanel from "@/components/simulation/tabs/settings/SettingsPanel";
+import StatsPanel from "@/components/simulation/tabs/stats/StatsPanel";
 
 export default function Home() {
   return (
@@ -25,10 +26,11 @@ export default function Home() {
               <Tabs>
                 <TabList>
                   <Tab index={0}>Population</Tab>
-                  <Tab index={1}>Settings</Tab>
-                  <Tab index={2}>Save</Tab>
-                  <Tab index={3}>Load</Tab>
-                  <Tab index={4}>About</Tab>
+                  <Tab index={1}>Stats</Tab>
+                  <Tab index={2}>Settings</Tab>
+                  <Tab index={3}>Save</Tab>
+                  <Tab index={4}>Load</Tab>
+                  <Tab index={5}>About</Tab>
                 </TabList>
 
                 <TabPanel index={0}>
@@ -36,18 +38,22 @@ export default function Home() {
                 </TabPanel>
 
                 <TabPanel index={1}>
-                  <SettingsPanel />
+                  <StatsPanel />
                 </TabPanel>
 
                 <TabPanel index={2}>
-                  <SavePanel />
+                  <SettingsPanel />
                 </TabPanel>
 
                 <TabPanel index={3}>
-                  <LoadPanel />
+                  <SavePanel />
                 </TabPanel>
 
                 <TabPanel index={4}>
+                  <LoadPanel />
+                </TabPanel>
+
+                <TabPanel index={5}>
                   Source code:{" "}
                   <a
                     href="https://github.com/carlo697/react-biosim"
