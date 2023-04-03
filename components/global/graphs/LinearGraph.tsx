@@ -4,7 +4,7 @@ import { useWindowSize } from "react-use";
 
 interface Props {
   data: any[];
-  getter: (point: any) => number;
+  getter: (point: any) => [number, number];
   resolution?: number;
   margins?: { top: number; bottom: number; left: number; right: number };
   preSmooth?: boolean;
@@ -113,9 +113,9 @@ export default function LinearGraph({
         : points[rightIndex];
 
       // Interpolate the points
-      const interpolatedIndex = lerp(leftIndex, rightIndex, atPoint);
-      const interpolatedValue = lerp(leftPoint, rightPoint, atPoint);
-      return [interpolatedIndex, interpolatedValue];
+      const interpolatedX = lerp(leftPoint[0], rightPoint[0], atPoint);
+      const interpolatedY = lerp(leftPoint[1], rightPoint[1], atPoint);
+      return [interpolatedX, interpolatedY];
     },
     [getter]
   );
@@ -124,7 +124,7 @@ export default function LinearGraph({
     (
       points: number[]
     ): {
-      points: number[];
+      points: [number, number][];
       minX: number;
       maxX: number;
       minY: number;
@@ -135,12 +135,18 @@ export default function LinearGraph({
       const resizeFactor = (points.length - 1) / (sampleSize - 1);
 
       // Create new array
-      const sampledPoints: number[] = [];
+      const sampledPoints: [number, number][] = [];
       const offset = zoomViewportLeft * (points.length - 1);
 
       // Sample the points for the new filtered data
       for (let sampleIndex = 0; sampleIndex < sampleSize; sampleIndex++) {
-        let finalValue = 0;
+        // This decimal value represents where this index
+        // would lay on the original array
+        const originalIndex =
+          offset + sampleIndex * resizeFactor * zoomViewportWidth;
+
+        // Set the data
+        let finalValue = getInterpolatedPointAt(points, originalIndex);
 
         if (preSmooth) {
           // Apply median filter
@@ -165,22 +171,14 @@ export default function LinearGraph({
             sum += getInterpolatedPointAt(points, medianIndex)[1];
           }
 
-          finalValue = sum / count;
-        } else {
-          // This decimal value represents where this index
-          // would lay on the original array
-          const originalIndex =
-            offset + sampleIndex * resizeFactor * zoomViewportWidth;
-
-          // Set the data
-          finalValue = getInterpolatedPointAt(points, originalIndex)[1];
+          finalValue[1] = sum / count;
         }
 
         // Set new value
         sampledPoints[sampleIndex] = finalValue;
       }
 
-      const finalPoints: number[] = [];
+      const finalPoints: [number, number][] = [];
 
       // Record min and max values
       let minX = Number.MAX_VALUE;
@@ -190,7 +188,8 @@ export default function LinearGraph({
 
       // Apply mean filter
       for (let index = 0; index < sampledPoints.length; index++) {
-        let finalValue = 0;
+        const graphPoint = sampledPoints[index];
+        let finalValue: [number, number] = [graphPoint[0], graphPoint[1]];
 
         if (postSmooth) {
           // Apply median filter
@@ -201,30 +200,28 @@ export default function LinearGraph({
             j < Math.min(sampledPoints.length - 1, index + postSmoothness);
             j++
           ) {
-            sum += sampledPoints[j];
+            sum += sampledPoints[j][1];
             count++;
           }
 
-          finalValue = sum / count;
-        } else {
-          finalValue = sampledPoints[index];
+          finalValue[1] = sum / count;
         }
 
         // Set new value
         finalPoints[index] = finalValue;
 
         // Find min and max X values
-        if (index < minX) {
-          minX = index;
-        } else if (index > maxX) {
-          maxX = index;
+        if (finalValue[0] < minX) {
+          minX = finalValue[0];
+        } else if (finalValue[0] > maxX) {
+          maxX = finalValue[0];
         }
 
         // Find min and max Y values
-        if (finalValue < minY) {
-          minY = finalValue;
-        } else if (finalValue > maxY) {
-          maxY = finalValue;
+        if (finalValue[1] < minY) {
+          minY = finalValue[1];
+        } else if (finalValue[1] > maxY) {
+          maxY = finalValue[1];
         }
       }
 
@@ -278,37 +275,42 @@ export default function LinearGraph({
         const { points, minX, maxX, minY, maxY } = getFilteredData(data);
 
         // Function to get coordinates of point
-        const dataToCanvasPoint = (index: number, value: number): number[] => {
-          const x = interpolate(
-            index,
+        const pointToCanvasPoint = (x: number, y: number): [number, number] => {
+          const interpolatedX = interpolate(
+            x,
             minX,
             maxX,
             margins.left,
             width - margins.right
           );
 
-          const y = interpolate(
-            value,
+          const interpolatedY = interpolate(
+            y,
             minY,
             maxY,
             height - margins.bottom,
             margins.top
           );
 
-          return [x, y];
+          return [interpolatedX, interpolatedY];
         };
 
         // Begin path
         context.beginPath();
 
         // Start path at the first point
-        let point = dataToCanvasPoint(0, points[0]);
-        context.moveTo(point[0], point[1]);
+        const firstGraphPoint = points[0];
+        let canvasPoint = pointToCanvasPoint(
+          firstGraphPoint[0],
+          firstGraphPoint[1]
+        );
+        context.moveTo(canvasPoint[0], canvasPoint[1]);
 
         for (let pointIndex = 1; pointIndex < points.length; pointIndex++) {
+          const graphPoint = points[pointIndex];
           // Draw line to the next point
-          point = dataToCanvasPoint(pointIndex, points[pointIndex]);
-          context.lineTo(point[0], point[1]);
+          canvasPoint = pointToCanvasPoint(graphPoint[0], graphPoint[1]);
+          context.lineTo(canvasPoint[0], canvasPoint[1]);
         }
 
         // Draw the path

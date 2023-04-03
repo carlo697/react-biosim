@@ -8,8 +8,8 @@ import { SingleGeneration } from "@/simulation/world/stats/GenerationRegistry";
 import LinearGraph from "@/components/global/graphs/LinearGraph";
 import useWorldPropertyValue from "@/hooks/useWorldPropertyValue";
 
-function getter(data: SingleGeneration) {
-  return data.survivorCount;
+function getter(data: SingleGeneration): [number, number] {
+  return [data.generation, data.survivorCount];
 }
 
 export default function StatsPanel() {
@@ -22,9 +22,12 @@ export default function StatsPanel() {
     0
   );
 
-  const survivorCountFormatter = useCallback((value: number) => {
-    return ((value / initialPopulation) * 100).toFixed(1).toString() + "%";
-  }, [initialPopulation]);
+  const survivorCountFormatter = useCallback(
+    (value: number) => {
+      return ((value / initialPopulation) * 100).toFixed(1).toString() + "%";
+    },
+    [initialPopulation]
+  );
 
   const generationFormatter = useCallback((value: number) => {
     return "Generation #" + Math.round(value).toString();
