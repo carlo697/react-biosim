@@ -42,7 +42,16 @@ export default function StatsPanel() {
 
   return (
     <div>
-      <LinearGraph data={data} getter={getter} updateKey={updates} />
+      <LinearGraph
+        data={data}
+        getter={getter}
+        updateKey={updates}
+        preSmooth={true}
+        preSmoothSamples={10}
+        preSmoothRadius={1}
+        postSmooth={true}
+        postSmoothness={2}
+      />
     </div>
   );
 }

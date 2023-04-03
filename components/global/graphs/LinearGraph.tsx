@@ -7,8 +7,11 @@ interface Props {
   getter: (point: any) => number;
   resolution?: number;
   margins?: { top: number; bottom: number; left: number; right: number };
-  smooth?: boolean;
-  smoothness?: number;
+  preSmooth?: boolean;
+  preSmoothSamples?: number;
+  preSmoothRadius?: number;
+  postSmooth?: boolean;
+  postSmoothness?: number;
   updateKey?: any;
 }
 
@@ -17,8 +20,11 @@ export default function LinearGraph({
   getter,
   resolution = 1,
   margins = { top: 20, bottom: 40, left: 20, right: 40 },
-  smooth = true,
-  smoothness = 10,
+  preSmooth = true,
+  preSmoothSamples = 10,
+  preSmoothRadius = 1,
+  postSmooth = false,
+  postSmoothness = 1,
   updateKey,
 }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -119,20 +125,52 @@ export default function LinearGraph({
       const resizeFactor = (points.length - 1) / (sampleSize - 1);
 
       // Create new array
-      const newPoints: number[] = [];
+      const sampledPoints: number[] = [];
       const offset = zoomViewportLeft * (points.length - 1);
 
-      for (let index = 0; index < sampleSize; index++) {
-        // This decimal value represents where this index
-        // would lay on the original array
-        let position = offset + index * resizeFactor * zoomViewportWidth;
-        // let position =
-        //   offset +
-        //   ((index / (sampleSize - 1)) * (points.length - 1)) / this.zoomLevel;
+      // Sample the points for the new filtered data
+      for (let sampleIndex = 0; sampleIndex < sampleSize; sampleIndex++) {
+        let finalValue = 0;
 
-        // Set the data
-        newPoints[index] = getInterpolatedPointAt(points, position)[1];
+        if (preSmooth) {
+          // Apply median filter
+          const count = preSmoothSamples * 2 + 1;
+          const leftIndex =
+            offset + (sampleIndex - 1) * resizeFactor * zoomViewportWidth;
+          const rightIndex =
+            offset + (sampleIndex + 1) * resizeFactor * zoomViewportWidth;
+          const minInterpolant = 0.5 - preSmoothRadius / 2;
+          const maxInterpolant = 0.5 + preSmoothRadius / 2;
+
+          let sum = 0;
+          for (let j = -preSmoothSamples; j <= preSmoothSamples; j++) {
+            const interpolant = interpolate(
+              j,
+              -preSmoothSamples,
+              preSmoothSamples,
+              minInterpolant,
+              maxInterpolant
+            );
+            const medianIndex = lerp(leftIndex, rightIndex, interpolant);
+            sum += getInterpolatedPointAt(points, medianIndex)[1];
+          }
+
+          finalValue = sum / count;
+        } else {
+          // This decimal value represents where this index
+          // would lay on the original array
+          const originalIndex =
+            offset + sampleIndex * resizeFactor * zoomViewportWidth;
+
+          // Set the data
+          finalValue = getInterpolatedPointAt(points, originalIndex)[1];
+        }
+
+        // Set new value
+        sampledPoints[sampleIndex] = finalValue;
       }
+
+      const finalPoints: number[] = [];
 
       // Record min and max values
       let minX = Number.MAX_VALUE;
@@ -141,52 +179,58 @@ export default function LinearGraph({
       let maxY = Number.MIN_VALUE;
 
       // Apply mean filter
-      for (let index = 0; index < newPoints.length; index++) {
-        let finalValue = newPoints[index];
-        if (smooth) {
+      for (let index = 0; index < sampledPoints.length; index++) {
+        let finalValue = 0;
+
+        if (postSmooth) {
           // Apply median filter
           let count = 0;
-          let valueSum = 0;
+          let sum = 0;
           for (
-            let j = Math.max(0, index - smoothness);
-            j < Math.min(newPoints.length - 1, index + smoothness);
+            let j = Math.max(0, index - postSmoothness);
+            j < Math.min(sampledPoints.length - 1, index + postSmoothness);
             j++
           ) {
-            valueSum += newPoints[j];
+            sum += sampledPoints[j];
             count++;
           }
 
-          finalValue = valueSum / count;
-
-          // Set new value
-          newPoints[index] = finalValue;
+          finalValue = sum / count;
+        } else {
+          finalValue = sampledPoints[index];
         }
 
-        // Find min and max values
+        // Set new value
+        finalPoints[index] = finalValue;
+
+        // Find min and max X values
         if (index < minX) {
           minX = index;
-        }
-        if (index > maxX) {
+        } else if (index > maxX) {
           maxX = index;
         }
+
+        // Find min and max Y values
         if (finalValue < minY) {
           minY = finalValue;
-        }
-        if (finalValue > maxY) {
+        } else if (finalValue > maxY) {
           maxY = finalValue;
         }
       }
 
-      return { points: newPoints, minX, maxX, minY, maxY };
+      return { points: finalPoints, minX, maxX, minY, maxY };
     },
     [
       absoluteGraphWidth,
       resolution,
-      zoomViewportWidth,
       zoomViewportLeft,
+      preSmooth,
+      zoomViewportWidth,
+      preSmoothRadius,
+      preSmoothSamples,
       getInterpolatedPointAt,
-      smooth,
-      smoothness,
+      postSmooth,
+      postSmoothness,
     ]
   );
 
