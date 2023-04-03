@@ -13,6 +13,9 @@ interface Props {
   postSmooth?: boolean;
   postSmoothness?: number;
   updateKey?: any;
+  drawLinesToCursor?: boolean;
+  xLabelFormatter?: (value: number) => string;
+  yLabelFormatter?: (value: number) => string;
 }
 
 export default function LinearGraph({
@@ -26,6 +29,9 @@ export default function LinearGraph({
   postSmooth = false,
   postSmoothness = 1,
   updateKey,
+  drawLinesToCursor = true,
+  xLabelFormatter = (value) => value.toString(),
+  yLabelFormatter = (value) => value.toString(),
 }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -83,7 +89,7 @@ export default function LinearGraph({
   ]);
 
   const getInterpolatedPointAt = useCallback(
-    (points: any[], index: number): [number, number] => {
+    (points: any[], index: number, useGetter = true): [number, number] => {
       // Position can be greater than (points.length - 1) (because of float
       // precision) for a extremely tiny value, for example (0.000000000002)
       // so let's clamp the value
@@ -99,8 +105,12 @@ export default function LinearGraph({
       const atPoint = index - leftIndex;
 
       // Get left and right points
-      const leftPoint = getter(points[leftIndex]);
-      const rightPoint = getter(points[rightIndex]);
+      const leftPoint = useGetter
+        ? getter(points[leftIndex])
+        : points[leftIndex];
+      const rightPoint = useGetter
+        ? getter(points[rightIndex])
+        : points[rightIndex];
 
       // Interpolate the points
       const interpolatedIndex = lerp(leftIndex, rightIndex, atPoint);
@@ -303,6 +313,56 @@ export default function LinearGraph({
 
         // Draw the path
         context.stroke();
+
+        if (isMouseInsideCanvas && drawLinesToCursor) {
+          const clampedMouseX = clamp(
+            relativeMouseX,
+            margins.left,
+            canvasWidth - margins.right
+          );
+
+          // Find the coordinates on the graph at the cursor
+          const normalizedCursorX =
+            (relativeMouseX - margins.left) / absoluteGraphWidth;
+          const targetIndex = normalizedCursorX * (points.length - 1);
+          const [x, y] = getInterpolatedPointAt(points, targetIndex, false);
+          const intersectionY =
+            margins.top + interpolate(y, minY, maxY, absoluteGraphHeight, 0);
+
+          // Draw X line to cursor intersection
+          context.strokeStyle = "rgba(0,0,255,0.2)";
+          context.beginPath();
+          context.moveTo(clampedMouseX, intersectionY);
+          context.lineTo(width - margins.right, intersectionY);
+          context.stroke();
+
+          // Draw Y line to cursor intersection
+          context.beginPath();
+          context.moveTo(clampedMouseX, intersectionY);
+          context.lineTo(clampedMouseX, height - margins.bottom);
+          context.stroke();
+
+          // Get the labels to render
+          const xText = xLabelFormatter(x);
+          const yText = yLabelFormatter(y);
+
+          // Print the x label
+          context.font = "bold 12px arial";
+          context.textAlign = "center";
+          context.fillText(
+            xText,
+            clampedMouseX,
+            height - margins.bottom + textSize * 2
+          );
+
+          // Print the Y label
+          context.textAlign = "left";
+          context.fillText(
+            yText,
+            width - margins.right + textSize / 2,
+            intersectionY
+          );
+        }
       }
 
       // Draw zoom viewport
@@ -319,12 +379,21 @@ export default function LinearGraph({
       // context.stroke();
     },
     [
+      absoluteGraphHeight,
+      absoluteGraphWidth,
+      canvasWidth,
       data,
+      drawLinesToCursor,
       getFilteredData,
+      getInterpolatedPointAt,
+      isMouseInsideCanvas,
       margins.bottom,
       margins.left,
       margins.right,
       margins.top,
+      relativeMouseX,
+      xLabelFormatter,
+      yLabelFormatter,
     ]
   );
 
