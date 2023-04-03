@@ -241,6 +241,41 @@ export default function LinearGraph({
     ]
   );
 
+  // Function to get coordinates of point
+  const pointToCanvasPoint = useCallback(
+    (
+      filteredData: ReturnType<typeof getFilteredData>,
+      x: number,
+      y: number
+    ): [number, number] => {
+      const interpolatedX = interpolate(
+        x,
+        filteredData.minX,
+        filteredData.maxX,
+        margins.left,
+        canvasWidth - margins.right
+      );
+
+      const interpolatedY = interpolate(
+        y,
+        filteredData.minY,
+        filteredData.maxY,
+        canvasHeight - margins.bottom,
+        margins.top
+      );
+
+      return [interpolatedX, interpolatedY];
+    },
+    [
+      canvasHeight,
+      canvasWidth,
+      margins.bottom,
+      margins.left,
+      margins.right,
+      margins.top,
+    ]
+  );
+
   const drawGraph = useCallback(
     (canvas: HTMLCanvasElement) => {
       if (!canvas) return;
@@ -271,29 +306,10 @@ export default function LinearGraph({
         const textSize = 12;
         context.lineWidth = 2;
         context.strokeStyle = "blue";
+
         // Get the points to render
-        const { points, minX, maxX, minY, maxY } = getFilteredData(data);
-
-        // Function to get coordinates of point
-        const pointToCanvasPoint = (x: number, y: number): [number, number] => {
-          const interpolatedX = interpolate(
-            x,
-            minX,
-            maxX,
-            margins.left,
-            width - margins.right
-          );
-
-          const interpolatedY = interpolate(
-            y,
-            minY,
-            maxY,
-            height - margins.bottom,
-            margins.top
-          );
-
-          return [interpolatedX, interpolatedY];
-        };
+        const filteredData = getFilteredData(data);
+        const { points, minY, maxY } = filteredData;
 
         // Begin path
         context.beginPath();
@@ -301,6 +317,7 @@ export default function LinearGraph({
         // Start path at the first point
         const firstGraphPoint = points[0];
         let canvasPoint = pointToCanvasPoint(
+          filteredData,
           firstGraphPoint[0],
           firstGraphPoint[1]
         );
@@ -309,7 +326,11 @@ export default function LinearGraph({
         for (let pointIndex = 1; pointIndex < points.length; pointIndex++) {
           const graphPoint = points[pointIndex];
           // Draw line to the next point
-          canvasPoint = pointToCanvasPoint(graphPoint[0], graphPoint[1]);
+          canvasPoint = pointToCanvasPoint(
+            filteredData,
+            graphPoint[0],
+            graphPoint[1]
+          );
           context.lineTo(canvasPoint[0], canvasPoint[1]);
         }
 
@@ -393,6 +414,7 @@ export default function LinearGraph({
       margins.left,
       margins.right,
       margins.top,
+      pointToCanvasPoint,
       relativeMouseX,
       xLabelFormatter,
       yLabelFormatter,
