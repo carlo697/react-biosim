@@ -440,7 +440,7 @@ export default function LinearGraph({
         if (e.deltaY > 0) {
           newZoom /= 1.1;
         } else {
-          newZoom *= 1.02;
+          newZoom *= 1.05;
         }
         newZoom = clamp(newZoom, 1, 1000);
         setZoomLevel(newZoom);
