@@ -69,6 +69,7 @@ export default function StatsPanel() {
         postSmoothness={2}
         xLabelFormatter={generationFormatter}
         yLabelFormatter={survivorCountFormatter}
+        className="aspect-[2/1] w-full bg-white"
       />
     </div>
   );

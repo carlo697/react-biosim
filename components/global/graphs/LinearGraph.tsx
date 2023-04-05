@@ -1,8 +1,9 @@
 import { clamp, interpolate, lerp } from "@/simulation/helpers/helpers";
+import classNames from "classnames";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useWindowSize } from "react-use";
 
-interface Props {
+interface Props extends React.ComponentPropsWithoutRef<"canvas"> {
   data: any[];
   getter: (point: any) => [number, number];
   resolution?: number;
@@ -32,6 +33,7 @@ export default function LinearGraph({
   drawLinesToCursor = true,
   xLabelFormatter = (value) => value.toString(),
   yLabelFormatter = (value) => value.toString(),
+  ...rest
 }: Props) {
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -524,7 +526,5 @@ export default function LinearGraph({
     if (canvas.current) drawGraph(canvas.current);
   }, [drawGraph, width, updateKey]);
 
-  return (
-    <canvas ref={canvas} className="aspect-square w-full bg-white"></canvas>
-  );
+  return <canvas ref={canvas} {...rest}></canvas>;
 }
