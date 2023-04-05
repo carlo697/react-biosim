@@ -58,6 +58,7 @@ export default function StatsPanel() {
 
   return (
     <div>
+      <h3 className="mb-1 text-2xl font-bold">Survival Rate (%)</h3>
       <LinearGraph
         data={data}
         getter={getter}
