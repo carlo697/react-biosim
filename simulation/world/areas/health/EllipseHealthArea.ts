@@ -1,17 +1,16 @@
 import EllipseObject from "../../objects/EllipseObject";
 import World from "../../World";
-import ReproductionArea from "./ReproductionArea";
+import HealthArea from "./HealthArea";
 
-export default class EllipseReproductionArea extends ReproductionArea(
-  EllipseObject
-) {
+export default class EllipseHealthArea extends HealthArea(EllipseObject) {
   constructor(
     world: World,
     x: number,
     y: number,
     width: number,
     height: number,
-    relative: boolean = true
+    relative: boolean = true,
+    public health: number = 0
   ) {
     super(world, x, y, width, height, relative);
   }

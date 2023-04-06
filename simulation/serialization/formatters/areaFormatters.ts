@@ -1,5 +1,5 @@
-import EllipseHealthArea from "../../world/areas/EllipseHealthArea";
-import RectangleHealthArea from "../../world/areas/RectangleHealthArea";
+import EllipseHealthArea from "../../world/areas/health/EllipseHealthArea";
+import RectangleHealthArea from "../../world/areas/health/RectangleHealthArea";
 import EllipseReproductionArea from "../../world/areas/reproduction/EllipseReproductionArea";
 import RectangleReproductionArea from "../../world/areas/reproduction/RectangleReproductionArea";
 import { DataFormatter } from "./DataFormatter";

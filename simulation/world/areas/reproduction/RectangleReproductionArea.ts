@@ -6,12 +6,12 @@ export default class RectangleReproductionArea extends ReproductionArea(
   RectangleObject
 ) {
   constructor(
-    public world: World,
-    public x: number,
-    public y: number,
-    public width: number,
-    public height: number,
-    public relative: boolean = true
+    world: World,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    relative: boolean = true
   ) {
     super(world, x, y, width, height, relative);
   }

@@ -1,5 +1,5 @@
 import { lerp } from "../../helpers/helpers";
-import World from "../World";
+import World, { colors } from "../World";
 import WorldObject from "../WorldObject";
 
 export default class MovingRectangleObstacle implements WorldObject {
@@ -20,7 +20,8 @@ export default class MovingRectangleObstacle implements WorldObject {
     public finalY: number,
     public finalWidth: number,
     public finalHeight: number,
-    public relative: boolean = true
+    public relative: boolean = true,
+    public color: string = colors.obstacle
   ) {
     if (relative) {
       this.setRelativeTransform(x, y, width, height);
@@ -29,11 +30,11 @@ export default class MovingRectangleObstacle implements WorldObject {
     }
   }
 
-  computePixels(): void {
+  computePixels() {
     throw new Error("Method not implemented.");
   }
 
-  computeStep?(): void {
+  computeStep() {
     const life = this.world.currentStep / this.world.stepsPerGen;
     // console.log(life)
     const x = lerp(this.x, this.finalX, life);
@@ -47,7 +48,7 @@ export default class MovingRectangleObstacle implements WorldObject {
     }
   }
 
-  onDrawBeforeCreatures(): void {
+  draw() {
     this.world.drawRect(
       this.absoluteX,
       this.absoluteY,

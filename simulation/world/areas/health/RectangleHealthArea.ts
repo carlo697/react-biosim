@@ -1,15 +1,15 @@
-import RectangleObject from "../objects/RectangleObject";
-import World from "../World";
+import RectangleObject from "../../objects/RectangleObject";
+import World from "../../World";
 import HealthArea from "./HealthArea";
 
 export default class RectangleHealthArea extends HealthArea(RectangleObject) {
   constructor(
-    public world: World,
-    public x: number,
-    public y: number,
-    public width: number,
-    public height: number,
-    public relative: boolean = true,
+    world: World,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    relative: boolean = true,
     public health: number = 0
   ) {
     super(world, x, y, width, height, relative);

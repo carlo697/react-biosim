@@ -1,4 +1,4 @@
-import World from "../World";
+import World, { colors } from "../World";
 import WorldObject from "../WorldObject";
 
 export default class RectangleObject implements WorldObject {
@@ -18,15 +18,15 @@ export default class RectangleObject implements WorldObject {
     public width: number,
     public height: number,
     public relative: boolean = true,
-    public color: string = "rgb(60, 60, 60)"
+    public color: string = colors.obstacle
   ) {}
 
-  computePixels(): void {
+  computePixels() {
     // Recalculate transform and pixels
     this.computeTransform();
   }
 
-  computeTransform(): void {
+  computeTransform() {
     if (this.relative) {
       this.setRelativeTransform(this.x, this.y, this.width, this.height);
     } else {
@@ -34,7 +34,7 @@ export default class RectangleObject implements WorldObject {
     }
   }
 
-  onDrawAfterCreatures(): void {
+  draw() {
     this.world.drawRect(
       this.worldX,
       this.worldY,

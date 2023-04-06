@@ -18,6 +18,13 @@ type GridPoint = {
 };
 type Grid = Array<Array<GridPoint>>;
 
+export const colors = {
+  reproduction: "rgba(0,0,255,0.1)",
+  obstacle: "rgb(60, 60, 60)",
+  healing: "rgba(0,255,0, 0.1)",
+  danger: "rgba(255,0,0, 0.1)",
+};
+
 export default class World {
   static instance?: World;
 
@@ -103,16 +110,6 @@ export default class World {
       this.currentCreatures = [];
     }
 
-    // Generate pixels of obstacles
-    for (let i = 0; i < this.obstacles.length; i++) {
-      this.obstacles[i].computePixels();
-    }
-
-    // Generate pixels of areas
-    for (let i = 0; i < this.areas.length; i++) {
-      this.areas[i].computePixels();
-    }
-
     this.initializeGrid();
     this.computeGrid();
     if (restart) {
@@ -155,7 +152,17 @@ export default class World {
   }
 
   private initializeGrid(): void {
-    // Initialize grid
+    // Generate pixels of obstacles
+    for (let i = 0; i < this.obstacles.length; i++) {
+      this.obstacles[i].computePixels();
+    }
+
+    // Generate pixels of areas
+    for (let i = 0; i < this.areas.length; i++) {
+      this.areas[i].computePixels();
+    }
+
+    // Initialize the grid
     this.grid = [];
     for (let x = 0; x < this.size; x++) {
       // Create column
@@ -175,23 +182,23 @@ export default class World {
       obstacleIdx < this.obstacles.length;
       obstacleIdx++
     ) {
-      const obstacle: WorldObject = this.obstacles[obstacleIdx];
+      const obstacle = this.obstacles[obstacleIdx];
 
       for (let pixelIdx = 0; pixelIdx < obstacle.pixels.length; pixelIdx++) {
-        const position = obstacle.pixels[pixelIdx];
+        const cell = obstacle.pixels[pixelIdx];
         // Set pixel
-        this.grid[position[0]][position[1]].obstacle = obstacle;
+        this.grid[cell[0]][cell[1]].obstacle = obstacle;
       }
     }
 
     // Check areas
     for (let areaIdx = 0; areaIdx < this.areas.length; areaIdx++) {
-      const area: WorldArea = this.areas[areaIdx];
+      const area = this.areas[areaIdx];
 
       for (let pixelIdx = 0; pixelIdx < area.pixels.length; pixelIdx++) {
-        const position = area.pixels[pixelIdx];
+        const cell = area.pixels[pixelIdx];
         // Set pixel
-        this.grid[position[0]][position[1]].areas.push(area);
+        this.grid[cell[0]][cell[1]].areas.push(area);
       }
     }
 
@@ -480,16 +487,6 @@ export default class World {
     this.clearCanvas();
     this.resizeCanvas();
 
-    // Draw areas
-    for (let i = 0; i < this.areas.length; i++) {
-      this.areas[i].onDrawBeforeCreatures?.();
-    }
-
-    // Draw obstacles
-    for (let i = 0; i < this.obstacles.length; i++) {
-      this.obstacles[i].onDrawBeforeCreatures?.();
-    }
-
     this.selectionMethod?.onDrawBeforeCreatures?.(this);
 
     // Draw creatures
@@ -519,12 +516,12 @@ export default class World {
 
     // Draw areas
     for (let i = 0; i < this.areas.length; i++) {
-      this.areas[i].onDrawAfterCreatures?.();
+      this.areas[i].draw();
     }
 
     // Draw obstacles
     for (let i = 0; i < this.obstacles.length; i++) {
-      this.obstacles[i].onDrawAfterCreatures?.();
+      this.obstacles[i].draw();
     }
   }
 

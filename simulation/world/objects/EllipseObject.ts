@@ -1,4 +1,4 @@
-import World from "../World";
+import World, { colors } from "../World";
 import WorldObject from "../WorldObject";
 
 export default class EllipseObject implements WorldObject {
@@ -19,15 +19,15 @@ export default class EllipseObject implements WorldObject {
     public height: number,
     public relative: boolean = true,
     public drawIndividualPixels: boolean = false,
-    public color: string = "rgb(60, 60, 60)"
+    public color: string = colors.obstacle
   ) {}
 
-  computePixels(): void {
+  computePixels() {
     // Recalculate transform and pixels
     this.computeTransform();
   }
 
-  computeTransform(): void {
+  computeTransform() {
     if (this.relative) {
       this.setRelativeTransform(this.x, this.y, this.width, this.height);
     } else {
@@ -35,7 +35,7 @@ export default class EllipseObject implements WorldObject {
     }
   }
 
-  onDrawAfterCreatures(): void {
+  draw() {
     if (this.drawIndividualPixels) {
       for (let pixelIdx = 0; pixelIdx < this.pixels.length; pixelIdx++) {
         const pixel = this.pixels[pixelIdx];
