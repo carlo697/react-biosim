@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    @apply break-words;
+  }
+  
   a {
     @apply underline underline-offset-2;
   }
