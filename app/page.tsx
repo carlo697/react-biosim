@@ -5,6 +5,7 @@ import Tabs from "@/components/global/tabs/Tabs";
 import Footer from "@/components/simulation/footer/Footer";
 import SimulationCanvas from "@/components/simulation/SimulationCanvas";
 import LoadPanel from "@/components/simulation/tabs/load/LoadPanel";
+import MapPanel from "@/components/simulation/tabs/map/MapPanel";
 import PopulationPanel from "@/components/simulation/tabs/population/PopulationPanel";
 import SavePanel from "@/components/simulation/tabs/save/SavePanel";
 import SettingsPanel from "@/components/simulation/tabs/settings/SettingsPanel";
@@ -28,9 +29,10 @@ export default function Home() {
                   <Tab index={0}>Population</Tab>
                   <Tab index={1}>Stats</Tab>
                   <Tab index={2}>Settings</Tab>
-                  <Tab index={3}>Save</Tab>
-                  <Tab index={4}>Load</Tab>
-                  <Tab index={5}>About</Tab>
+                  <Tab index={3}>Map</Tab>
+                  <Tab index={4}>Save</Tab>
+                  <Tab index={5}>Load</Tab>
+                  <Tab index={6}>About</Tab>
                 </TabList>
 
                 <TabPanel index={0}>
@@ -46,14 +48,18 @@ export default function Home() {
                 </TabPanel>
 
                 <TabPanel index={3}>
-                  <SavePanel />
+                  <MapPanel />
                 </TabPanel>
 
                 <TabPanel index={4}>
-                  <LoadPanel />
+                  <SavePanel />
                 </TabPanel>
 
                 <TabPanel index={5}>
+                  <LoadPanel />
+                </TabPanel>
+
+                <TabPanel index={6}>
                   Source code:{" "}
                   <a
                     href="https://github.com/carlo697/react-biosim"
