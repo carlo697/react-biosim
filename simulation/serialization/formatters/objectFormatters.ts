@@ -9,9 +9,8 @@ const objectFormatters: {
     serialize({ x, y, width, height, relative, color }: RectangleObject) {
       return { x, y, width, height, relative, color };
     },
-    deserialize(data, world): RectangleObject {
+    deserialize(data): RectangleObject {
       return new RectangleObject(
-        world,
         data.x,
         data.y,
         data.width,
@@ -42,9 +41,8 @@ const objectFormatters: {
         color,
       };
     },
-    deserialize(data, world): EllipseObject {
+    deserialize(data): EllipseObject {
       return new EllipseObject(
-        world,
         data.x,
         data.y,
         data.width,

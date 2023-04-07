@@ -11,9 +11,8 @@ const areaFormatters: {
     serialize({ x, y, width, height, relative }: RectangleReproductionArea) {
       return { x, y, width, height, relative };
     },
-    deserialize(data, world): RectangleReproductionArea {
+    deserialize(data): RectangleReproductionArea {
       return new RectangleReproductionArea(
-        world,
         data.x,
         data.y,
         data.width,
@@ -27,9 +26,8 @@ const areaFormatters: {
     serialize({ x, y, width, height, relative }: EllipseReproductionArea) {
       return { x, y, width, height, relative };
     },
-    deserialize(data, world): EllipseReproductionArea {
+    deserialize(data): EllipseReproductionArea {
       return new EllipseReproductionArea(
-        world,
         data.x,
         data.y,
         data.width,
@@ -43,9 +41,8 @@ const areaFormatters: {
     serialize({ x, y, width, height, relative, health }: RectangleHealthArea) {
       return { x, y, width, height, relative, health };
     },
-    deserialize(data, world): RectangleHealthArea {
+    deserialize(data): RectangleHealthArea {
       return new RectangleHealthArea(
-        world,
         data.x,
         data.y,
         data.width,
@@ -60,9 +57,8 @@ const areaFormatters: {
     serialize({ x, y, width, height, relative, health }: EllipseHealthArea) {
       return { x, y, width, height, relative, health };
     },
-    deserialize(data, world): EllipseHealthArea {
+    deserialize(data): EllipseHealthArea {
       return new EllipseHealthArea(
-        world,
         data.x,
         data.y,
         data.width,
