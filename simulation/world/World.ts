@@ -154,12 +154,12 @@ export default class World {
   private initializeGrid(): void {
     // Generate pixels of obstacles
     for (let i = 0; i < this.obstacles.length; i++) {
-      this.obstacles[i].computePixels();
+      this.obstacles[i].computePixels(this.size);
     }
 
     // Generate pixels of areas
     for (let i = 0; i < this.areas.length; i++) {
-      this.areas[i].computePixels();
+      this.areas[i].computePixels(this.size);
     }
 
     // Initialize the grid
@@ -516,12 +516,12 @@ export default class World {
 
     // Draw areas
     for (let i = 0; i < this.areas.length; i++) {
-      this.areas[i].draw();
+      this.areas[i].draw(this.ctx, this.size);
     }
 
     // Draw obstacles
     for (let i = 0; i < this.obstacles.length; i++) {
-      this.obstacles[i].draw();
+      this.obstacles[i].draw(this.ctx, this.size);
     }
   }
 

@@ -6,13 +6,12 @@ export default class EllipseReproductionArea extends ReproductionArea(
   EllipseObject
 ) {
   constructor(
-    world: World,
     x: number,
     y: number,
     width: number,
     height: number,
     relative: boolean = true
   ) {
-    super(world, x, y, width, height, relative);
+    super(x, y, width, height, relative);
   }
 }

@@ -4,7 +4,6 @@ import HealthArea from "./HealthArea";
 
 export default class RectangleHealthArea extends HealthArea(RectangleObject) {
   constructor(
-    world: World,
     x: number,
     y: number,
     width: number,
@@ -12,7 +11,7 @@ export default class RectangleHealthArea extends HealthArea(RectangleObject) {
     relative: boolean = true,
     public health: number = 0
   ) {
-    super(world, x, y, width, height, relative);
+    super(x, y, width, height, relative);
   }
 }
 

@@ -15,9 +15,9 @@ export default function HealthArea<TBase extends WorldObjectType>(Base: TBase) {
       creature.health += this.health;
     }
 
-    draw() {
+    draw(context: CanvasRenderingContext2D, worldSize: number) {
       this.color = this.health >= 0 ? colors.healing : colors.danger;
-      super.draw();
+      super.draw(context, worldSize);
     }
   };
 }

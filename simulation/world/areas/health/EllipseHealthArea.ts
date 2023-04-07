@@ -4,7 +4,6 @@ import HealthArea from "./HealthArea";
 
 export default class EllipseHealthArea extends HealthArea(EllipseObject) {
   constructor(
-    world: World,
     x: number,
     y: number,
     width: number,
@@ -12,6 +11,6 @@ export default class EllipseHealthArea extends HealthArea(EllipseObject) {
     relative: boolean = true,
     public health: number = 0
   ) {
-    super(world, x, y, width, height, relative);
+    super(x, y, width, height, relative);
   }
 }

@@ -1,4 +1,4 @@
-import World, { colors } from "../World";
+import { colors } from "../World";
 import WorldObject from "../WorldObject";
 
 export default class EllipseObject implements WorldObject {
@@ -12,7 +12,6 @@ export default class EllipseObject implements WorldObject {
   worldBottom: number = 0;
 
   constructor(
-    public world: World,
     public x: number,
     public y: number,
     public width: number,
@@ -22,52 +21,88 @@ export default class EllipseObject implements WorldObject {
     public color: string = colors.obstacle
   ) {}
 
-  computePixels() {
+  computePixels(worldSize: number) {
     // Recalculate transform and pixels
-    this.computeTransform();
+    this.computeTransform(worldSize);
   }
 
-  computeTransform() {
+  computeTransform(worldSize: number) {
     if (this.relative) {
-      this.setRelativeTransform(this.x, this.y, this.width, this.height);
+      this.setRelativeTransform(
+        worldSize,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
     } else {
-      this.setWorldTransform(this.x, this.y, this.width, this.height);
-    }
-  }
-
-  draw() {
-    if (this.drawIndividualPixels) {
-      for (let pixelIdx = 0; pixelIdx < this.pixels.length; pixelIdx++) {
-        const pixel = this.pixels[pixelIdx];
-        this.world.drawRect(pixel[0], pixel[1], 1.1, 1.1, this.color);
-      }
-    } else {
-      this.world.drawEllipse(
-        this.worldX,
-        this.worldY,
-        this.worldWidth,
-        this.worldHeight,
-        this.color
+      this.setWorldTransform(
+        worldSize,
+        this.x,
+        this.y,
+        this.width,
+        this.height
       );
     }
   }
 
+  draw(context: CanvasRenderingContext2D, worldSize: number) {
+    context.fillStyle = this.color;
+
+    if (this.drawIndividualPixels) {
+      for (let pixelIdx = 0; pixelIdx < this.pixels.length; pixelIdx++) {
+        const pixel = this.pixels[pixelIdx];
+
+        context.beginPath();
+        context.rect(
+          context.canvas.width * (pixel[0] / worldSize),
+          context.canvas.height * (pixel[1] / worldSize),
+          context.canvas.width * (1.1 / worldSize),
+          context.canvas.height * (1.1 / worldSize)
+        );
+        context.fill();
+      }
+    } else {
+      const radiusX = this.width / 2;
+      const radiusY = this.height / 2;
+
+      context.beginPath();
+      context.ellipse(
+        context.canvas.width * (this.x + radiusX),
+        context.canvas.height * (this.y + radiusY),
+        context.canvas.width * radiusX,
+        context.canvas.height * radiusY,
+        0,
+        0,
+        2 * Math.PI
+      );
+      context.fill();
+    }
+  }
+
   setRelativeTransform(
+    worldSize: number,
     left: number,
     top: number,
     width: number,
     height: number
   ) {
     // Calculate world coordinates
-    const absoluteWidth = Math.floor(width * this.world.size);
-    const absoluteHeight = Math.floor(height * this.world.size);
-    left = Math.floor(left * this.world.size);
-    top = Math.floor(top * this.world.size);
+    const absoluteWidth = Math.floor(width * worldSize);
+    const absoluteHeight = Math.floor(height * worldSize);
+    left = Math.floor(left * worldSize);
+    top = Math.floor(top * worldSize);
 
-    this.setWorldTransform(left, top, absoluteWidth, absoluteHeight);
+    this.setWorldTransform(worldSize, left, top, absoluteWidth, absoluteHeight);
   }
 
-  setWorldTransform(left: number, top: number, width: number, height: number) {
+  setWorldTransform(
+    worldSize: number,
+    left: number,
+    top: number,
+    width: number,
+    height: number
+  ) {
     // Calculate world coordinates
     this.worldRight = left + width;
     this.worldBottom = top + height;
@@ -86,16 +121,8 @@ export default class EllipseObject implements WorldObject {
 
     // Recreate pixels
     this.pixels = [];
-    for (
-      let y = this.worldY;
-      y < this.worldBottom && y < this.world.size;
-      y++
-    ) {
-      for (
-        let x = this.worldX;
-        x < this.worldRight && x < this.world.size;
-        x++
-      ) {
+    for (let y = this.worldY; y < this.worldBottom && y < worldSize; y++) {
+      for (let x = this.worldX; x < this.worldRight && x < worldSize; x++) {
         if (y >= 0 && x >= 0) {
           // We want to measure the distance to the center of the pixels and
           // not to their upper left corners, so me add 0.5

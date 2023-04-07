@@ -1,4 +1,4 @@
-import World, { colors } from "../World";
+import { colors } from "../World";
 import WorldObject from "../WorldObject";
 
 export default class RectangleObject implements WorldObject {
@@ -12,7 +12,6 @@ export default class RectangleObject implements WorldObject {
   worldBottom: number = 0;
 
   constructor(
-    public world: World,
     public x: number,
     public y: number,
     public width: number,
@@ -21,45 +20,67 @@ export default class RectangleObject implements WorldObject {
     public color: string = colors.obstacle
   ) {}
 
-  computePixels() {
+  computePixels(worldSize: number) {
     // Recalculate transform and pixels
-    this.computeTransform();
+    this.computeTransform(worldSize);
   }
 
-  computeTransform() {
+  computeTransform(worldSize: number) {
     if (this.relative) {
-      this.setRelativeTransform(this.x, this.y, this.width, this.height);
+      this.setRelativeTransform(
+        worldSize,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
     } else {
-      this.setWorldTransform(this.x, this.y, this.width, this.height);
+      this.setWorldTransform(
+        worldSize,
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
     }
   }
 
-  draw() {
-    this.world.drawRect(
-      this.worldX,
-      this.worldY,
-      this.worldWidth,
-      this.worldHeight,
-      this.color
+  draw(context: CanvasRenderingContext2D) {
+    context.fillStyle = this.color;
+
+    context.beginPath();
+    context.rect(
+      context.canvas.width * this.x,
+      context.canvas.height * this.y,
+      context.canvas.width * this.width,
+      context.canvas.height * this.height
     );
+    context.fill();
   }
 
   setRelativeTransform(
+    worldSize: number,
     left: number,
     top: number,
     width: number,
     height: number
   ) {
     // Calculate world coordinates
-    const absoluteWidth = Math.floor(width * this.world.size);
-    const absoluteHeight = Math.floor(height * this.world.size);
-    left = Math.floor(left * this.world.size);
-    top = Math.floor(top * this.world.size);
+    const absoluteWidth = Math.floor(width * worldSize);
+    const absoluteHeight = Math.floor(height * worldSize);
+    left = Math.floor(left * worldSize);
+    top = Math.floor(top * worldSize);
 
-    this.setWorldTransform(left, top, absoluteWidth, absoluteHeight);
+    this.setWorldTransform(worldSize, left, top, absoluteWidth, absoluteHeight);
   }
 
-  setWorldTransform(left: number, top: number, width: number, height: number) {
+  setWorldTransform(
+    worldSize: number,
+    left: number,
+    top: number,
+    width: number,
+    height: number
+  ) {
     // Calculate world coordinates
     this.worldRight = left + width;
     this.worldBottom = top + height;
@@ -72,16 +93,8 @@ export default class RectangleObject implements WorldObject {
 
     // Recreate pixels
     this.pixels = [];
-    for (
-      let y = this.worldY;
-      y < this.worldBottom && y < this.world.size;
-      y++
-    ) {
-      for (
-        let x = this.worldX;
-        x < this.worldRight && x < this.world.size;
-        x++
-      ) {
+    for (let y = this.worldY; y < this.worldBottom && y < worldSize; y++) {
+      for (let x = this.worldX; x < this.worldRight && x < worldSize; x++) {
         if (y >= 0 && x >= 0) {
           this.pixels.push([x, y]);
         }
