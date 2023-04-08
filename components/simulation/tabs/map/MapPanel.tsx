@@ -2,13 +2,24 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { worldAtom } from "../../store";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import WorldObject from "@/simulation/world/WorldObject";
 import WorldArea from "@/simulation/world/areas/WorldArea";
 import { useWindowSize } from "react-use";
+import MapLayer from "./MapLayer";
+import { selectedMapObjectAtom } from "../../store/mapDrawingAtoms";
 
-function getName(obj: Object) {
-  return Object.getPrototypeOf(obj).constructor.name;
+function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
+  context.strokeStyle = "black";
+  context.lineWidth = 3;
+  context.beginPath();
+  context.rect(
+    context.canvas.width * obj.x,
+    context.canvas.height * obj.y,
+    context.canvas.width * obj.width,
+    context.canvas.height * obj.height
+  );
+  context.stroke();
 }
 
 export default function LoadPanel() {
@@ -20,23 +31,31 @@ export default function LoadPanel() {
   const [obstacles, setObstacles] = useState<WorldObject[]>([]);
   const [areas, setAreas] = useState<WorldArea[]>([]);
 
+  const [selectedMapObject, setSelectedMapObject] = useAtom(
+    selectedMapObjectAtom
+  );
+
   const draw = useCallback(() => {
     if (canvas.current) {
       // Update size
       canvas.current.width = canvas.current.clientWidth;
       canvas.current.height = canvas.current.clientHeight;
 
+      // Get the canvas' context
       const context = canvas.current.getContext("2d")!;
 
-      areas.forEach((area) => {
-        area.draw(context, worldSize);
+      // Draw every object
+      const allObjs = [...areas, ...obstacles];
+      allObjs.forEach((obj) => {
+        obj.draw(context, worldSize);
       });
 
-      obstacles.forEach((obstacle) => {
-        obstacle.draw(context, worldSize);
+      // Draw outlines
+      allObjs.forEach((obj) => {
+        if (selectedMapObject === obj) drawOutline(context, obj);
       });
     }
-  }, [areas, obstacles, worldSize]);
+  }, [areas, obstacles, selectedMapObject, worldSize]);
 
   // Draw the map
   useEffect(() => {
@@ -59,28 +78,20 @@ export default function LoadPanel() {
         ref={canvas}
       ></canvas>
 
-      <div>
+      <div className="px-5 w-full aspect-[1/2] overflow-y-scroll overflow-x-hidden">
         <h3 className="mb-1 text-2xl font-bold">Obstacles</h3>
-        {obstacles.map((obstacle, index) => {
-          const { color } = obstacle;
-
-          return (
-            <div key={index}>
-              {getName(obstacle)} {color}
-            </div>
-          );
-        })}
+        <div className="flex flex-col gap-1">
+          {obstacles.map((obstacle, index) => (
+            <MapLayer key={index} obj={obstacle} worldSize={worldSize} />
+          ))}
+        </div>
 
         <h3 className="mb-1 text-2xl font-bold">Areas</h3>
-        {areas.map((area, index) => {
-          const { color } = area;
-
-          return (
-            <div key={index}>
-              {getName(area)} {color}
-            </div>
-          );
-        })}
+        <div className="flex flex-col gap-1">
+          {areas.map((area, index) => (
+            <MapLayer key={index} obj={area} worldSize={worldSize} />
+          ))}
+        </div>
       </div>
     </div>
   );
