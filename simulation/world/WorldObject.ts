@@ -1,4 +1,9 @@
 export default interface WorldObject {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+
   pixels: [number, number][];
   color: string;
 
