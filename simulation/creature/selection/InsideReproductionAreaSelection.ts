@@ -13,7 +13,7 @@ export default class InsideReproductionAreaSelection
 
       if (
         creature.isAlive &&
-        gridPoint.areas.find((area) => area.areaType === 0)
+        gridPoint.objects.find((obj) => obj.areaType === 0)
       ) {
         parents.push(creature);
       }

@@ -86,16 +86,16 @@ export default function SimulationCanvas({ className }: Props) {
 
     applyInitialValues(world);
 
-    // A map divided in two sections by 5 squares
-    world.obstacles = [
+    world.objects = [
+      // A reproduction zone at the center
+      new RectangleReproductionArea(0.25, 0.25, 0.5, 0.5, true),
+      // A map divided in two sections by 5 squares
       new RectangleObject(0, 0, 0.2, 0.2),
       new RectangleObject(0.2, 0.2, 0.2, 0.2),
       new RectangleObject(0.4, 0.4, 0.2, 0.2),
       new RectangleObject(0.6, 0.6, 0.2, 0.2),
       new RectangleObject(0.8, 0.8, 0.2, 0.2),
     ];
-    // A reproduction zone at the center
-    world.areas = [new RectangleReproductionArea(0.25, 0.25, 0.5, 0.5, true)];
 
     // Initialize world and start simulation
     world.initializeWorld(true);

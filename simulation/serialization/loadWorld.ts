@@ -1,11 +1,9 @@
 import Creature from "../creature/Creature";
 import Genome from "../creature/genome/Genome";
-import WorldArea from "../world/areas/WorldArea";
 import { GenerationRegistry } from "../world/stats/GenerationRegistry";
 import World from "../world/World";
 import WorldObject from "../world/WorldObject";
 import SavedWorld from "./data/SavedWorld";
-import areaFormatters from "./formatters/areaFormatters";
 import generationRegistryFormatter from "./formatters/generationRegistryFormatter";
 import objectFormatters from "./formatters/objectFormatters";
 
@@ -57,11 +55,11 @@ export function loadWorld(world: World, data: string) {
   });
   world.currentCreatures = creatures;
 
-  // Clear world obstacles
-  world.obstacles = [];
+  // Clear world objects
+  world.objects = [];
 
-  // Load obstacles
-  parsed.obstacles.forEach((savedObject) => {
+  // Load objects
+  parsed.objects.forEach((savedObject) => {
     const formatter = objectFormatters[savedObject.type];
 
     if (formatter) {
@@ -69,23 +67,7 @@ export function loadWorld(world: World, data: string) {
         savedObject.data,
         world
       );
-      world.obstacles.push(worldObject);
-    }
-  });
-
-  // Clear world areas
-  world.areas = [];
-
-  // Load areas
-  parsed.areas.forEach((savedObject) => {
-    const formatter = areaFormatters[savedObject.type];
-
-    if (formatter) {
-      const worldArea: WorldArea = formatter.deserialize(
-        savedObject.data,
-        world
-      );
-      world.areas.push(worldArea);
+      world.objects.push(worldObject);
     }
   });
 

@@ -200,7 +200,7 @@ export default class CreatureSensors {
 
     //Touch
     if (this.data.Touch.enabled) {
-      // Outputs: 0.0 -> empty, 1.0 -> creature or obstacle
+      // Outputs: 0.0 -> empty, 1.0 -> creature or solid cell
 
       // Top
       let x = creature.position[0];
@@ -208,7 +208,7 @@ export default class CreatureSensors {
       let tile;
       if (y >= 0) {
         tile = creature.world.grid[x][y];
-        values.push(tile.creature || tile.obstacle ? 1.0 : 0);
+        values.push(tile.creature || tile.isSolid ? 1.0 : 0);
       }
 
       // Right
@@ -216,7 +216,7 @@ export default class CreatureSensors {
       y = creature.position[1];
       if (x < creature.world.size) {
         tile = creature.world.grid[x][y];
-        values.push(tile.creature || tile.obstacle ? 1.0 : 0);
+        values.push(tile.creature || tile.isSolid ? 1.0 : 0);
       }
 
       // Bottom
@@ -224,7 +224,7 @@ export default class CreatureSensors {
       y = creature.position[1] + 1;
       if (y < creature.world.size) {
         tile = creature.world.grid[x][y];
-        values.push(tile.creature || tile.obstacle ? 1.0 : 0);
+        values.push(tile.creature || tile.isSolid ? 1.0 : 0);
       }
 
       // Left
@@ -232,7 +232,7 @@ export default class CreatureSensors {
       y = creature.position[1];
       if (x >= 0) {
         tile = creature.world.grid[x][y];
-        values.push(tile.creature || tile.obstacle ? 1.0 : 0);
+        values.push(tile.creature || tile.isSolid ? 1.0 : 0);
       }
     }
 

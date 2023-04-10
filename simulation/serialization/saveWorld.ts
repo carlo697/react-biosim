@@ -4,7 +4,6 @@ import World from "../world/World";
 import SavedSpecies from "./data/SavedSpecies";
 import SavedWorld from "./data/SavedWorld";
 import SavedWorldObject from "./data/SavedWorldObject";
-import areaFormatters from "./formatters/areaFormatters";
 import generationRegistryFormatter from "./formatters/generationRegistryFormatter";
 import objectFormatters from "./formatters/objectFormatters";
 
@@ -47,47 +46,23 @@ export function saveWorld(world: World): SavedWorld {
     (a, b) => b.creatures.length - a.creatures.length
   );
 
-  // Save obstacles
-  const obstacles: SavedWorldObject[] = [];
-  for (
-    let obstacleIdx = 0;
-    obstacleIdx < world.obstacles.length;
-    obstacleIdx++
-  ) {
-    const obstacle = world.obstacles[obstacleIdx];
+  // Save objects
+  const objects: SavedWorldObject[] = [];
+  for (let objectIndex = 0; objectIndex < world.objects.length; objectIndex++) {
+    const obj = world.objects[objectIndex];
 
     // Find the formatter
-    const className: string = Object.getPrototypeOf(obstacle).constructor.name;
+    const className: string = Object.getPrototypeOf(obj).constructor.name;
     const formatter = objectFormatters[className];
     if (formatter) {
       // If the formatter was found, serialize the object
-      const data = formatter.serialize(obstacle);
+      const data = formatter.serialize(obj);
       // Save it
       const item: SavedWorldObject = {
         data,
         type: className,
       };
-      obstacles.push(item);
-    }
-  }
-
-  // Save areas
-  const areas: SavedWorldObject[] = [];
-  for (let areaIdx = 0; areaIdx < world.areas.length; areaIdx++) {
-    const area = world.areas[areaIdx];
-
-    // Find the formatter
-    const className: string = Object.getPrototypeOf(area).constructor.name;
-    const formatter = areaFormatters[className];
-    if (formatter) {
-      // If the formatter was found, serialize the object
-      const data = formatter.serialize(area);
-      // Save it
-      const item: SavedWorldObject = {
-        data,
-        type: className,
-      };
-      areas.push(item);
+      objects.push(item);
     }
   }
 
@@ -124,8 +99,7 @@ export function saveWorld(world: World): SavedWorld {
     sensors,
     actions,
 
-    obstacles,
-    areas,
+    objects,
     generations,
   };
 }

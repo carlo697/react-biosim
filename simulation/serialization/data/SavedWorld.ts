@@ -42,8 +42,7 @@ export default interface SavedWorld {
   // Species
   species: SavedSpecies[];
 
-  obstacles: SavedWorldObject[];
-  areas: SavedWorldObject[];
+  objects: SavedWorldObject[];
 
   generations: SavedGenerationRegistry;
 }

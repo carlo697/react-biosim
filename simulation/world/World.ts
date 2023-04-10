@@ -7,14 +7,13 @@ import EastWallSelection from "../creature/selection/EastWallSelection";
 import SelectionMethod from "../creature/selection/SelectionMethod";
 import CreatureSensors from "../creature/sensors/CreatureSensors";
 import { WorldEvents } from "../events/WorldEvents";
-import WorldArea from "./areas/WorldArea";
 import { GenerationRegistry } from "./stats/GenerationRegistry";
 import WorldObject from "./WorldObject";
 
 type GridPoint = {
   creature: Creature | null;
-  obstacle: WorldObject | null;
-  areas: WorldArea[];
+  objects: WorldObject[];
+  isSolid: boolean;
 };
 type Grid = Array<Array<GridPoint>>;
 
@@ -68,8 +67,7 @@ export default class World {
 
   // World
   grid: Grid = [];
-  obstacles: WorldObject[] = [];
-  areas: WorldArea[] = [];
+  objects: WorldObject[] = [];
 
   // Sensors and actions
   sensors: CreatureSensors = new CreatureSensors();
@@ -152,14 +150,9 @@ export default class World {
   }
 
   private initializeGrid(): void {
-    // Generate pixels of obstacles
-    for (let i = 0; i < this.obstacles.length; i++) {
-      this.obstacles[i].computePixels(this.size);
-    }
-
-    // Generate pixels of areas
-    for (let i = 0; i < this.areas.length; i++) {
-      this.areas[i].computePixels(this.size);
+    // Generate pixels of objects
+    for (let i = 0; i < this.objects.length; i++) {
+      this.objects[i].computePixels(this.size);
     }
 
     // Initialize the grid
@@ -169,36 +162,29 @@ export default class World {
       const col: Array<GridPoint> = [];
       for (let y = 0; y < this.size; y++) {
         // Create and push row
-        col.push({ creature: null, obstacle: null, areas: [] });
+        col.push({ creature: null, objects: [], isSolid: false });
       }
 
       // Push column
       this.grid.push(col);
     }
 
-    // Check obstacles
+    // Check objects
     for (
-      let obstacleIdx = 0;
-      obstacleIdx < this.obstacles.length;
-      obstacleIdx++
+      let objectIndex = 0;
+      objectIndex < this.objects.length;
+      objectIndex++
     ) {
-      const obstacle = this.obstacles[obstacleIdx];
+      const obj = this.objects[objectIndex];
 
-      for (let pixelIdx = 0; pixelIdx < obstacle.pixels.length; pixelIdx++) {
-        const cell = obstacle.pixels[pixelIdx];
+      for (let pixelIdx = 0; pixelIdx < obj.pixels.length; pixelIdx++) {
+        const [x, y] = obj.pixels[pixelIdx];
         // Set pixel
-        this.grid[cell[0]][cell[1]].obstacle = obstacle;
-      }
-    }
-
-    // Check areas
-    for (let areaIdx = 0; areaIdx < this.areas.length; areaIdx++) {
-      const area = this.areas[areaIdx];
-
-      for (let pixelIdx = 0; pixelIdx < area.pixels.length; pixelIdx++) {
-        const cell = area.pixels[pixelIdx];
-        // Set pixel
-        this.grid[cell[0]][cell[1]].areas.push(area);
+        this.grid[x][y].objects.push(obj);
+        // Is it solid?
+        if (obj.areaType === undefined) {
+          this.grid[x][y].isSolid = true;
+        }
       }
     }
 
@@ -301,8 +287,12 @@ export default class World {
         if (creature.isAlive) {
           // Effect of the areas the creature is in
           const point = this.grid[creature.position[0]][creature.position[1]];
-          for (let areaIdx = 0; areaIdx < point.areas.length; areaIdx++) {
-            point.areas[areaIdx].computeStepOnCreature?.(creature);
+          for (
+            let objectIndex = 0;
+            objectIndex < point.objects.length;
+            objectIndex++
+          ) {
+            point.objects[objectIndex].areaEffectOnCreature?.(creature);
           }
 
           creature.computeStep();
@@ -410,7 +400,9 @@ export default class World {
     //   }
     // }
     // return true;
-    return !this.grid[x][y].creature && !this.grid[x][y].obstacle;
+
+    const gridPoint = this.grid[x][y];
+    return !this.grid[x][y].creature && !gridPoint.isSolid;
   }
 
   public getRandomAvailablePositionDeepCheck(
@@ -444,7 +436,8 @@ export default class World {
       }
     }
 
-    return !hasCreature && !this.grid[x][y].obstacle;
+    const gridPoint = this.grid[x][y];
+    return !hasCreature && !gridPoint.isSolid;
   }
 
   public isTileInsideWorld(x: number, y: number): boolean {
@@ -514,14 +507,9 @@ export default class World {
 
     this.selectionMethod?.onDrawAfterCreatures?.(this);
 
-    // Draw areas
-    for (let i = 0; i < this.areas.length; i++) {
-      this.areas[i].draw(this.ctx, this.size);
-    }
-
-    // Draw obstacles
-    for (let i = 0; i < this.obstacles.length; i++) {
-      this.obstacles[i].draw(this.ctx, this.size);
+    // Draw objects
+    for (let i = 0; i < this.objects.length; i++) {
+      this.objects[i].draw(this.ctx, this.size);
     }
   }
 
