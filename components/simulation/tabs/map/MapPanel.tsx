@@ -6,7 +6,11 @@ import { useAtom, useAtomValue } from "jotai";
 import WorldObject from "@/simulation/world/WorldObject";
 import { useWindowSize } from "react-use";
 import MapLayer from "./MapLayer";
-import { selectedMapObjectAtom } from "../../store/mapDrawingAtoms";
+import {
+  painterObjectsAtom,
+  painterWorldSizeAtom,
+  painterSelectedObjectIndexAtom,
+} from "../../store/mapPainterAtoms";
 import MapObjectProperties from "./MapObjectProperties";
 
 function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
@@ -27,12 +31,9 @@ export default function LoadPanel() {
   const canvas = useRef<HTMLCanvasElement>(null);
 
   const { width } = useWindowSize();
-  const [worldSize, setWorldSize] = useState(0);
-  const [objects, setObjects] = useState<WorldObject[]>([]);
-
-  const [selectedMapObject, setSelectedMapObject] = useAtom(
-    selectedMapObjectAtom
-  );
+  const [worldSize, setWorldSize] = useAtom(painterWorldSizeAtom);
+  const [objects, setObjects] = useAtom(painterObjectsAtom);
+  const selectedObjectIndex = useAtomValue(painterSelectedObjectIndexAtom);
 
   const draw = useCallback(() => {
     if (canvas.current) {
@@ -49,11 +50,11 @@ export default function LoadPanel() {
       });
 
       // Draw outlines
-      objects.forEach((obj) => {
-        if (selectedMapObject === obj) drawOutline(context, obj);
+      objects.forEach((obj, index) => {
+        if (index === selectedObjectIndex) drawOutline(context, obj);
       });
     }
-  }, [objects, selectedMapObject, worldSize]);
+  }, [objects, selectedObjectIndex, worldSize]);
 
   // Draw the map
   useEffect(() => {
@@ -66,7 +67,7 @@ export default function LoadPanel() {
       setWorldSize(world.size);
       setObjects(world.objects.map((obj) => obj.clone()));
     }
-  }, [world]);
+  }, [setObjects, setWorldSize, world]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -80,7 +81,7 @@ export default function LoadPanel() {
           <h3 className="mb-1 text-2xl font-bold">Objects</h3>
           <div className="flex flex-col gap-1">
             {objects.map((obstacle, index) => (
-              <MapLayer key={index} obj={obstacle} worldSize={worldSize} />
+              <MapLayer key={index} index={index} obj={obstacle} />
             ))}
           </div>
         </div>
@@ -89,7 +90,7 @@ export default function LoadPanel() {
       <div className="grid grid-cols-2 gap-5">
         <div></div>
         <div>
-          {selectedMapObject && <MapObjectProperties obj={selectedMapObject} />}
+          <MapObjectProperties />
         </div>
       </div>
     </div>

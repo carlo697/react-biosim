@@ -1,14 +1,17 @@
 "use client";
 
 import WorldObject from "@/simulation/world/WorldObject";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef } from "react";
 import { useWindowSize } from "react-use";
-import { selectedMapObjectAtom } from "../../store/mapDrawingAtoms";
+import {
+  painterWorldSizeAtom,
+  painterSelectedObjectIndexAtom,
+} from "../../store/mapPainterAtoms";
 import classNames from "classnames";
 
 interface Props {
-  worldSize: number;
+  index: number;
   obj: WorldObject;
 }
 
@@ -16,10 +19,11 @@ export function getName(obj: Object) {
   return Object.getPrototypeOf(obj).constructor.name;
 }
 
-export default function MapLayer({ worldSize, obj }: Props) {
+export default function MapLayer({ index, obj }: Props) {
+  const worldSize = useAtomValue(painterWorldSizeAtom);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [selectedMapObject, setSelectedMapObject] = useAtom(
-    selectedMapObjectAtom
+  const [selectedObjectIndex, setSelectedObjectIndex] = useAtom(
+    painterSelectedObjectIndexAtom
   );
 
   const draw = useCallback(() => {
@@ -41,14 +45,14 @@ export default function MapLayer({ worldSize, obj }: Props) {
   }, [draw, width]);
 
   const handleClick = () => {
-    setSelectedMapObject(obj);
+    setSelectedObjectIndex(index);
   };
 
   return (
     <button
       className={classNames(
         "flex w-full items-center gap-2 border-2 bg-grey-mid",
-        selectedMapObject === obj ? "border-white" : "border-transparent"
+        selectedObjectIndex === index ? "border-white" : "border-transparent"
       )}
       onClick={handleClick}
     >
