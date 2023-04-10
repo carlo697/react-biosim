@@ -13,6 +13,17 @@ export default class RectangleHealthArea extends HealthArea(RectangleObject) {
   ) {
     super(x, y, width, height, relative);
   }
+
+  clone() {
+    return new RectangleHealthArea(
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.relative,
+      this.health
+    );
+  }
 }
 
 // export default class RectangleHealthArea

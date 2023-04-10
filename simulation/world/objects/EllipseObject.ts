@@ -21,6 +21,18 @@ export default class EllipseObject implements WorldObject {
     public color: string = colors.obstacle
   ) {}
 
+  clone() {
+    return new EllipseObject(
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.relative,
+      this.drawIndividualPixels,
+      this.color
+    );
+  }
+
   computePixels(worldSize: number) {
     // Recalculate transform and pixels
     this.computeTransform(worldSize);
@@ -50,6 +62,10 @@ export default class EllipseObject implements WorldObject {
     context.fillStyle = this.color;
 
     if (this.drawIndividualPixels) {
+      if (this.pixels.length === 0) {
+        this.computeTransform(worldSize);
+      }
+
       for (let pixelIdx = 0; pixelIdx < this.pixels.length; pixelIdx++) {
         const pixel = this.pixels[pixelIdx];
 

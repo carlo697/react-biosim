@@ -9,4 +9,5 @@ export default interface WorldObject {
 
   computePixels(worldSize: number): void;
   draw(context: CanvasRenderingContext2D, worldSize: number): void;
+  clone(): WorldObject;
 }

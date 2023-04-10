@@ -13,4 +13,15 @@ export default class EllipseHealthArea extends HealthArea(EllipseObject) {
   ) {
     super(x, y, width, height, relative);
   }
+
+  clone() {
+    return new EllipseHealthArea(
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.relative,
+      this.health
+    );
+  }
 }

@@ -20,6 +20,17 @@ export default class RectangleObject implements WorldObject {
     public color: string = colors.obstacle
   ) {}
 
+  clone() {
+    return new RectangleObject(
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.relative,
+      this.color
+    );
+  }
+
   computePixels(worldSize: number) {
     // Recalculate transform and pixels
     this.computeTransform(worldSize);

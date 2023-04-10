@@ -14,4 +14,14 @@ export default class RectangleReproductionArea extends ReproductionArea(
   ) {
     super(x, y, width, height, relative);
   }
+
+  clone() {
+    return new RectangleReproductionArea(
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.relative
+    );
+  }
 }

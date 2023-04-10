@@ -14,4 +14,14 @@ export default class EllipseReproductionArea extends ReproductionArea(
   ) {
     super(x, y, width, height, relative);
   }
+
+  clone() {
+    return new EllipseReproductionArea(
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.relative
+    );
+  }
 }
