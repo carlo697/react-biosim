@@ -7,6 +7,7 @@ interface Props {
   onChange?: (value: number) => void;
   atom?: PrimitiveAtom<number>;
   label?: ReactNode;
+  step?: number
 }
 
 export default function NumberInput({
@@ -15,6 +16,7 @@ export default function NumberInput({
   onChange,
   atom,
   label,
+  step
 }: Props) {
   const [defaultAtom] = useState(() => newAtom(0));
   const [currentValue, setCurrentValue] = useAtom(atom ?? defaultAtom);
@@ -36,6 +38,7 @@ export default function NumberInput({
             : setCurrentValue(parseFloat(e.target.value))
         }
         className="min-w-0 bg-grey-mid p-1 text-sm"
+        step={step}
       />
     </div>
   );
