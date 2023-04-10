@@ -4,10 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { worldAtom } from "../../store";
 import { useAtom, useAtomValue } from "jotai";
 import WorldObject from "@/simulation/world/WorldObject";
-import WorldArea from "@/simulation/world/areas/WorldArea";
 import { useWindowSize } from "react-use";
 import MapLayer from "./MapLayer";
 import { selectedMapObjectAtom } from "../../store/mapDrawingAtoms";
+import MapObjectProperties from "./MapObjectProperties";
 
 function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
   context.strokeStyle = "black";
@@ -28,8 +28,7 @@ export default function LoadPanel() {
 
   const { width } = useWindowSize();
   const [worldSize, setWorldSize] = useState(0);
-  const [obstacles, setObstacles] = useState<WorldObject[]>([]);
-  const [areas, setAreas] = useState<WorldArea[]>([]);
+  const [objects, setObjects] = useState<WorldObject[]>([]);
 
   const [selectedMapObject, setSelectedMapObject] = useAtom(
     selectedMapObjectAtom
@@ -45,17 +44,16 @@ export default function LoadPanel() {
       const context = canvas.current.getContext("2d")!;
 
       // Draw every object
-      const allObjs = [...areas, ...obstacles];
-      allObjs.forEach((obj) => {
+      objects.forEach((obj) => {
         obj.draw(context, worldSize);
       });
 
       // Draw outlines
-      allObjs.forEach((obj) => {
+      objects.forEach((obj) => {
         if (selectedMapObject === obj) drawOutline(context, obj);
       });
     }
-  }, [areas, obstacles, selectedMapObject, worldSize]);
+  }, [objects, selectedMapObject, worldSize]);
 
   // Draw the map
   useEffect(() => {
@@ -66,31 +64,32 @@ export default function LoadPanel() {
   useEffect(() => {
     if (world) {
       setWorldSize(world.size);
-      setObstacles(world.obstacles);
-      setAreas(world.areas);
+      setObjects(world.objects.map((obj) => obj.clone()));
     }
   }, [world]);
 
   return (
-    <div className="grid grid-cols-3">
-      <canvas
-        className="col-span-2 aspect-square w-full bg-white"
-        ref={canvas}
-      ></canvas>
+    <div className="flex flex-col gap-5">
+      <div className="grid lg:grid-cols-3">
+        <canvas
+          className="aspect-square w-full bg-white lg:col-span-2"
+          ref={canvas}
+        ></canvas>
 
-      <div className="px-5 w-full aspect-[1/2] overflow-y-scroll overflow-x-hidden">
-        <h3 className="mb-1 text-2xl font-bold">Obstacles</h3>
-        <div className="flex flex-col gap-1">
-          {obstacles.map((obstacle, index) => (
-            <MapLayer key={index} obj={obstacle} worldSize={worldSize} />
-          ))}
+        <div className="w-full overflow-x-hidden overflow-y-scroll px-5 lg:aspect-[1/2]">
+          <h3 className="mb-1 text-2xl font-bold">Objects</h3>
+          <div className="flex flex-col gap-1">
+            {objects.map((obstacle, index) => (
+              <MapLayer key={index} obj={obstacle} worldSize={worldSize} />
+            ))}
+          </div>
         </div>
+      </div>
 
-        <h3 className="mb-1 text-2xl font-bold">Areas</h3>
-        <div className="flex flex-col gap-1">
-          {areas.map((area, index) => (
-            <MapLayer key={index} obj={area} worldSize={worldSize} />
-          ))}
+      <div className="grid grid-cols-2 gap-5">
+        <div></div>
+        <div>
+          {selectedMapObject && <MapObjectProperties obj={selectedMapObject} />}
         </div>
       </div>
     </div>

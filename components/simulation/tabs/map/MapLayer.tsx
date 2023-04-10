@@ -1,7 +1,6 @@
 "use client";
 
 import WorldObject from "@/simulation/world/WorldObject";
-import WorldArea from "@/simulation/world/areas/WorldArea";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useRef } from "react";
 import { useWindowSize } from "react-use";
@@ -10,10 +9,10 @@ import classNames from "classnames";
 
 interface Props {
   worldSize: number;
-  obj: WorldObject | WorldArea;
+  obj: WorldObject;
 }
 
-function getName(obj: Object) {
+export function getName(obj: Object) {
   return Object.getPrototypeOf(obj).constructor.name;
 }
 
