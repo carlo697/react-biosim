@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { worldAtom } from "../../store";
 import { useAtom, useAtomValue } from "jotai";
 import WorldObject from "@/simulation/world/WorldObject";
@@ -12,6 +12,7 @@ import {
   painterSelectedObjectIndexAtom,
 } from "../../store/mapPainterAtoms";
 import MapObjectProperties from "./MapObjectProperties";
+import MapPainterHeader from "./MapPainterHeader";
 
 function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
   context.strokeStyle = "black";
@@ -71,6 +72,8 @@ export default function LoadPanel() {
 
   return (
     <div className="flex flex-col gap-5">
+      <MapPainterHeader />
+
       <div className="grid lg:grid-cols-3">
         <canvas
           className="aspect-square w-full bg-white lg:col-span-2"
