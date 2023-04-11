@@ -25,6 +25,26 @@ function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
     context.canvas.height * obj.height
   );
   context.stroke();
+
+  // Handles
+  const normalizedHandles = [
+    { x: obj.x, y: obj.y },
+    { x: obj.x + obj.width, y: obj.y },
+    { x: obj.x, y: obj.y + obj.height },
+    { x: obj.x + obj.width, y: obj.y + obj.height },
+  ];
+  normalizedHandles.forEach((handle) => {
+    context.fillStyle = "white"
+    context.beginPath();
+    context.rect(
+      context.canvas.width * handle.x - 5,
+      context.canvas.height * handle.y - 5,
+      10,
+      10
+    );
+    context.stroke();
+    context.fill();
+  });
 }
 
 export default function LoadPanel() {
