@@ -7,7 +7,7 @@ interface Props {
   onChange?: (value: number) => void;
   atom?: PrimitiveAtom<number>;
   label?: ReactNode;
-  step?: number
+  step?: number;
 }
 
 export default function NumberInput({
@@ -16,10 +16,14 @@ export default function NumberInput({
   onChange,
   atom,
   label,
-  step
+  step,
 }: Props) {
   const [defaultAtom] = useState(() => newAtom(0));
   const [currentValue, setCurrentValue] = useAtom(atom ?? defaultAtom);
+
+  const parse = (value: string) => {
+    return parseFloat(value);
+  };
 
   return (
     <div className="flex flex-col">
@@ -34,8 +38,8 @@ export default function NumberInput({
         value={value ?? currentValue}
         onChange={(e) =>
           onChange
-            ? onChange(parseFloat(e.target.value))
-            : setCurrentValue(parseFloat(e.target.value))
+            ? onChange(parse(e.target.value))
+            : setCurrentValue(parse(e.target.value))
         }
         className="min-w-0 bg-grey-mid p-1 text-sm"
         step={step}

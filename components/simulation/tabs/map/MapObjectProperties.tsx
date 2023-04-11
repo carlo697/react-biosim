@@ -19,6 +19,38 @@ export default function MapObjectProperties() {
       ? objects[selectedObjectIndex]
       : undefined;
 
+  const update = () => {
+    setObjects([...objects]);
+  };
+
+  const updateX = (value: number) => {
+    if (selectedObject && !isNaN(value)) {
+      selectedObject.x = value;
+      update();
+    }
+  };
+
+  const updateY = (value: number) => {
+    if (selectedObject && !isNaN(value)) {
+      selectedObject.y = value;
+      update();
+    }
+  };
+
+  const updateWidth = (value: number) => {
+    if (selectedObject && !isNaN(value)) {
+      selectedObject.width = value;
+      update();
+    }
+  };
+
+  const updateHeight = (value: number) => {
+    if (selectedObject && !isNaN(value)) {
+      selectedObject.height = value;
+      update();
+    }
+  };
+
   return (
     <div>
       {selectedObject && (
@@ -31,14 +63,14 @@ export default function MapObjectProperties() {
             <NumberInput
               label="X"
               value={selectedObject.x}
-              onChange={(value) => (selectedObject.x = value)}
-              step={0.02}
+              onChange={updateX}
+              step={0.01}
             />
             <NumberInput
               label="Y"
               value={selectedObject.y}
-              onChange={(value) => (selectedObject.y = value)}
-              step={0.02}
+              onChange={updateY}
+              step={0.01}
             />
           </div>
 
@@ -46,14 +78,14 @@ export default function MapObjectProperties() {
             <NumberInput
               label="Width"
               value={selectedObject.width}
-              onChange={(value) => (selectedObject.width = value)}
-              step={0.02}
+              onChange={updateWidth}
+              step={0.01}
             />
             <NumberInput
               label="Height"
               value={selectedObject.height}
-              onChange={(value) => (selectedObject.height = value)}
-              step={0.02}
+              onChange={updateHeight}
+              step={0.01}
             />
           </div>
         </>
