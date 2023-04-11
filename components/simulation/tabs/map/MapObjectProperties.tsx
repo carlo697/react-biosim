@@ -7,6 +7,7 @@ import {
   painterObjectsAtom,
   painterSelectedObjectIndexAtom,
 } from "../../store/mapPainterAtoms";
+import Button from "@/components/global/Button";
 
 export default function MapObjectProperties() {
   const [objects, setObjects] = useAtom(painterObjectsAtom);
@@ -51,6 +52,11 @@ export default function MapObjectProperties() {
     }
   };
 
+  const handleDelete = () => {
+    setSelectedObjectIndex(undefined);
+    setObjects(objects.filter((_, index) => index !== selectedObjectIndex));
+  };
+
   return (
     <div>
       {selectedObject && (
@@ -87,6 +93,10 @@ export default function MapObjectProperties() {
               onChange={updateHeight}
               step={0.01}
             />
+          </div>
+
+          <div className="mt-2 grid grid-cols-2">
+            <Button onClick={handleDelete}>Delete</Button>
           </div>
         </>
       )}
