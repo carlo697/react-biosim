@@ -62,10 +62,6 @@ export default class EllipseObject implements WorldObject {
     context.fillStyle = this.color;
 
     if (this.drawIndividualPixels) {
-      if (this.pixels.length === 0) {
-        this.computeTransform(worldSize);
-      }
-
       for (let pixelIdx = 0; pixelIdx < this.pixels.length; pixelIdx++) {
         const pixel = this.pixels[pixelIdx];
 

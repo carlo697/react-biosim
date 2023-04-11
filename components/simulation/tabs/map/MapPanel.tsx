@@ -34,7 +34,7 @@ function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
     { x: obj.x + obj.width, y: obj.y + obj.height },
   ];
   normalizedHandles.forEach((handle) => {
-    context.fillStyle = "white"
+    context.fillStyle = "white";
     context.beginPath();
     context.rect(
       context.canvas.width * handle.x - 5,
@@ -55,10 +55,28 @@ export default function LoadPanel() {
   const [worldSize, setWorldSize] = useAtom(painterWorldSizeAtom);
   const [objects, setObjects] = useAtom(painterObjectsAtom);
   const selectedObjectIndex = useAtomValue(painterSelectedObjectIndexAtom);
+  const selectedObject = selectedObjectIndex
+    ? objects[selectedObjectIndex]
+    : undefined;
 
-  const [normalizedMouse, setNormalizedMouse] = useState({ x: 0, y: 0 });
   const [isClicking, setIsClicking] = useState(false);
+  const [normalizedMouse, setNormalizedMouse] = useState({ x: 0, y: 0 });
+  const [lastNormalizedMouse, setLastNormalizedMouse] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [normalizedMouseSpeed, setNormalizedMouseSpeed] = useState({
+    x: 0,
+    y: 0,
+  });
 
+  // Compute pixels of objects
+  useEffect(() => {
+    objects.forEach((obj) => obj.computePixels(worldSize));
+    console.log("calculated");
+  }, [objects, worldSize]);
+
+  // Draw the objects, outlines and handles
   const draw = useCallback(() => {
     if (canvas.current) {
       // Update size
@@ -122,6 +140,42 @@ export default function LoadPanel() {
       };
     }
   }, [onPointerMove, onPointerDown, onPointerUp]);
+
+  // Capture mouse speed
+  useEffect(() => {
+    const newSpeed = {
+      x: normalizedMouse.x - lastNormalizedMouse.x,
+      y: normalizedMouse.y - lastNormalizedMouse.y,
+    };
+    setLastNormalizedMouse(normalizedMouse);
+    setNormalizedMouseSpeed(newSpeed);
+  }, [lastNormalizedMouse.x, lastNormalizedMouse.y, normalizedMouse]);
+
+  // Move objecs
+  useEffect(() => {
+    if (isClicking && selectedObject) {
+      if (
+        normalizedMouse.x >= selectedObject.x &&
+        normalizedMouse.x <= selectedObject.x + selectedObject.width &&
+        normalizedMouse.y >= selectedObject.y &&
+        normalizedMouse.y <= selectedObject.y + selectedObject.height &&
+        (normalizedMouseSpeed.x || normalizedMouseSpeed.y)
+      ) {
+        selectedObject.x += normalizedMouseSpeed.x;
+        selectedObject.y += normalizedMouseSpeed.y;
+        setObjects([...objects]);
+      }
+    }
+  }, [
+    isClicking,
+    normalizedMouse.x,
+    normalizedMouse.y,
+    normalizedMouseSpeed.x,
+    normalizedMouseSpeed.y,
+    objects,
+    selectedObject,
+    setObjects,
+  ]);
 
   // Draw the map
   useEffect(() => {
