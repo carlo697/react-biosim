@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { worldAtom } from "../../store";
 import { useAtom, useAtomValue } from "jotai";
 import WorldObject from "@/simulation/world/WorldObject";
@@ -36,6 +36,9 @@ export default function LoadPanel() {
   const [objects, setObjects] = useAtom(painterObjectsAtom);
   const selectedObjectIndex = useAtomValue(painterSelectedObjectIndexAtom);
 
+  const [normalizedMouse, setNormalizedMouse] = useState({ x: 0, y: 0 });
+  const [isClicking, setIsClicking] = useState(false);
+
   const draw = useCallback(() => {
     if (canvas.current) {
       // Update size
@@ -56,6 +59,49 @@ export default function LoadPanel() {
       });
     }
   }, [objects, selectedObjectIndex, worldSize]);
+
+  const onPointerMove = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+
+    if (canvas.current) {
+      const canvasRect = canvas.current.getBoundingClientRect();
+
+      // Calculate the normalized mouse position relative to the canvas
+      const x = (e.clientX - canvasRect.left) / canvasRect.width;
+      const y = (e.clientY - canvasRect.top) / canvasRect.height;
+      setNormalizedMouse({ x, y });
+    }
+  }, []);
+
+  const onPointerDown = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+
+    setIsClicking(true);
+  }, []);
+
+  const onPointerUp = useCallback((e: MouseEvent) => {
+    e.preventDefault();
+
+    setIsClicking(false);
+  }, []);
+
+  // Bind canvas events
+  useEffect(() => {
+    const _canvas = canvas.current;
+    if (_canvas) {
+      _canvas.addEventListener("pointermove", onPointerMove);
+      // _canvas.addEventListener("pointerleave", onPointerUp);
+      _canvas.addEventListener("pointerdown", onPointerDown);
+      _canvas.addEventListener("pointerup", onPointerUp);
+
+      return () => {
+        _canvas.removeEventListener("pointermove", onPointerMove);
+        // _canvas.addEventListener("pointerleave", onPointerUp);
+        _canvas.removeEventListener("pointerdown", onPointerDown);
+        _canvas.removeEventListener("pointerup", onPointerUp);
+      };
+    }
+  }, [onPointerMove, onPointerDown, onPointerUp]);
 
   // Draw the map
   useEffect(() => {
