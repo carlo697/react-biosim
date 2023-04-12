@@ -70,12 +70,6 @@ export default function LoadPanel() {
     y: 0,
   });
 
-  // Compute pixels of objects
-  useEffect(() => {
-    objects.forEach((obj) => obj.computePixels(worldSize));
-    console.log("calculated");
-  }, [objects, worldSize]);
-
   // Draw the objects, outlines and handles
   const draw = useCallback(() => {
     if (canvas.current) {
@@ -88,6 +82,7 @@ export default function LoadPanel() {
 
       // Draw every object
       objects.forEach((obj) => {
+        obj.computePixels(worldSize);
         obj.draw(context, worldSize);
       });
 
@@ -163,7 +158,7 @@ export default function LoadPanel() {
       ) {
         selectedObject.x += normalizedMouseSpeed.x;
         selectedObject.y += normalizedMouseSpeed.y;
-        setObjects([...objects]);
+        setObjects(objects.map((obj) => obj.clone()));
       }
     }
   }, [

@@ -21,7 +21,7 @@ export default function MapObjectProperties() {
       : undefined;
 
   const update = () => {
-    setObjects([...objects]);
+    setObjects(objects.map((obj) => obj.clone()));
   };
 
   const updateX = (value: number) => {

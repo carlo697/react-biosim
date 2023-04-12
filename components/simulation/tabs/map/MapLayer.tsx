@@ -33,7 +33,7 @@ export default function MapLayer({ index, obj }: Props) {
       canvas.current.height = canvas.current.clientHeight;
 
       const context = canvas.current.getContext("2d")!;
-
+      obj.computePixels(worldSize);
       obj.draw(context, worldSize);
     }
   }, [obj, worldSize]);
