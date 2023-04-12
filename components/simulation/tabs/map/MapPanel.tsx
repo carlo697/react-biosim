@@ -55,9 +55,8 @@ export default function LoadPanel() {
   const [worldSize, setWorldSize] = useAtom(painterWorldSizeAtom);
   const [objects, setObjects] = useAtom(painterObjectsAtom);
   const selectedObjectIndex = useAtomValue(painterSelectedObjectIndexAtom);
-  const selectedObject = selectedObjectIndex
-    ? objects[selectedObjectIndex]
-    : undefined;
+  const selectedObject =
+    selectedObjectIndex != undefined ? objects[selectedObjectIndex] : undefined;
 
   const [isClicking, setIsClicking] = useState(false);
   const [normalizedMouse, setNormalizedMouse] = useState({ x: 0, y: 0 });
