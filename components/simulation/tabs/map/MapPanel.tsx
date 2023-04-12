@@ -14,6 +14,11 @@ import {
 import MapObjectProperties from "./MapObjectProperties";
 import MapPainterHeader from "./MapPainterHeader";
 
+type Coordinates = {
+  x: number;
+  y: number;
+};
+
 function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
   context.strokeStyle = "black";
   context.lineWidth = 3;
@@ -27,7 +32,7 @@ function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
   context.stroke();
 
   // Handles
-  const normalizedHandles = [
+  const normalizedHandles: Coordinates[] = [
     { x: obj.x, y: obj.y },
     { x: obj.x + obj.width, y: obj.y },
     { x: obj.x, y: obj.y + obj.height },
@@ -58,16 +63,21 @@ export default function LoadPanel() {
   const selectedObject =
     selectedObjectIndex != undefined ? objects[selectedObjectIndex] : undefined;
 
+  // Mouse interaction
   const [isClicking, setIsClicking] = useState(false);
-  const [normalizedMouse, setNormalizedMouse] = useState({ x: 0, y: 0 });
-  const [lastNormalizedMouse, setLastNormalizedMouse] = useState({
+  const [normalizedMouse, setNormalizedMouse] = useState<Coordinates>({
     x: 0,
     y: 0,
   });
-  const [normalizedMouseSpeed, setNormalizedMouseSpeed] = useState({
-    x: 0,
-    y: 0,
-  });
+
+  // Mouse dragging
+  const [isDragging, setIsDragging] = useState(false);
+  const [startDragMousePos, setStartDragMousePos] = useState<
+    Coordinates | undefined
+  >(undefined);
+  const [startDragTargetPos, setStartDragTargetPos] = useState<
+    Coordinates | undefined
+  >(undefined);
 
   // Draw the objects, outlines and handles
   const draw = useCallback(() => {
@@ -135,40 +145,58 @@ export default function LoadPanel() {
     }
   }, [onPointerMove, onPointerDown, onPointerUp]);
 
-  // Capture mouse speed
-  useEffect(() => {
-    const newSpeed = {
-      x: normalizedMouse.x - lastNormalizedMouse.x,
-      y: normalizedMouse.y - lastNormalizedMouse.y,
-    };
-    setLastNormalizedMouse(normalizedMouse);
-    setNormalizedMouseSpeed(newSpeed);
-  }, [lastNormalizedMouse.x, lastNormalizedMouse.y, normalizedMouse]);
-
   // Move objecs
   useEffect(() => {
     if (isClicking && selectedObject) {
+      // Start dragging an object
       if (
         normalizedMouse.x >= selectedObject.x &&
         normalizedMouse.x <= selectedObject.x + selectedObject.width &&
         normalizedMouse.y >= selectedObject.y &&
-        normalizedMouse.y <= selectedObject.y + selectedObject.height &&
-        (normalizedMouseSpeed.x || normalizedMouseSpeed.y)
+        normalizedMouse.y <= selectedObject.y + selectedObject.height
       ) {
-        selectedObject.x += normalizedMouseSpeed.x;
-        selectedObject.y += normalizedMouseSpeed.y;
-        setObjects(objects.map((obj) => obj.clone()));
+        setIsDragging(true);
       }
+
+      if (isDragging) {
+        if (!startDragMousePos || !startDragTargetPos) {
+          // Save the start position
+          setStartDragMousePos({ x: normalizedMouse.x, y: normalizedMouse.y });
+          setStartDragTargetPos({ x: selectedObject.x, y: selectedObject.y });
+        } else {
+          // Calculate new position
+          let newX =
+            startDragTargetPos.x + (normalizedMouse.x - startDragMousePos.x);
+          let newY =
+            startDragTargetPos.y + (normalizedMouse.y - startDragMousePos.y);
+          // Round the new position
+          newX = Math.round(newX * worldSize) / worldSize;
+          newY = Math.round(newY * worldSize) / worldSize;
+
+          if (selectedObject.x !== newX || selectedObject.y !== newY) {
+            // Only apply it if there were any change
+            selectedObject.x = newX;
+            selectedObject.y = newY;
+            setObjects(objects.map((obj) => obj.clone()));
+          }
+        }
+      }
+    } else {
+      setIsDragging(false);
+      setStartDragMousePos(undefined);
+      setStartDragTargetPos(undefined);
     }
   }, [
     isClicking,
+    isDragging,
     normalizedMouse.x,
     normalizedMouse.y,
-    normalizedMouseSpeed.x,
-    normalizedMouseSpeed.y,
     objects,
     selectedObject,
     setObjects,
+    startDragMousePos,
+    startDragTargetPos,
+    worldSize,
   ]);
 
   // Draw the map
