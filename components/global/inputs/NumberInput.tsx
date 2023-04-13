@@ -41,7 +41,7 @@ export default function NumberInput({
             ? onChange(parse(e.target.value))
             : setCurrentValue(parse(e.target.value))
         }
-        className="min-w-0 bg-grey-mid p-1 text-sm"
+        className="w-0 min-w-full bg-grey-mid p-1 text-sm"
         step={step}
       />
     </div>
