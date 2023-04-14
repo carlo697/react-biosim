@@ -44,12 +44,7 @@ function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
   context.stroke();
 
   // Handles
-  const normalizedHandles: Coordinates[] = [
-    { x: obj.x, y: obj.y },
-    { x: obj.x + obj.width, y: obj.y },
-    { x: obj.x, y: obj.y + obj.height },
-    { x: obj.x + obj.width, y: obj.y + obj.height },
-  ];
+  const normalizedHandles = getHandles(obj);
   normalizedHandles.forEach((handle) => {
     context.fillStyle = "white";
     context.beginPath();
@@ -171,16 +166,23 @@ export default function LoadPanel() {
     if (isClicking && selectedObject) {
       if (isDragging) {
         if (!startDragMousePos || !startDragTargetPos) {
-          // Save the start position
+          // Save the start position of the mouse and the object
           setStartDragMousePos({ x: normalizedMouse.x, y: normalizedMouse.y });
           setStartDragTargetPos({ x: selectedObject.x, y: selectedObject.y });
         } else {
-          // Calculate new position
-          let newMouseX =
-            startDragTargetPos.x + (normalizedMouse.x - startDragMousePos.x);
-          let newMouseY =
-            startDragTargetPos.y + (normalizedMouse.y - startDragMousePos.y);
-          // Round the new position
+          // Determine the mouse position relative to the thing being moved
+          let newMouseX;
+          let newMouseY;
+          if (draggedHandle !== undefined) {
+            newMouseX = normalizedMouse.x;
+            newMouseY = normalizedMouse.y;
+          } else {
+            newMouseX =
+              startDragTargetPos.x + (normalizedMouse.x - startDragMousePos.x);
+            newMouseY =
+              startDragTargetPos.y + (normalizedMouse.y - startDragMousePos.y);
+          }
+          // Round the mouse position
           newMouseX = Math.round(newMouseX * worldSize) / worldSize;
           newMouseY = Math.round(newMouseY * worldSize) / worldSize;
 
@@ -197,11 +199,31 @@ export default function LoadPanel() {
               newY = newMouseY;
               newWidth = normalizedHandles[2].x - newX;
               newHeight = normalizedHandles[2].y - newY;
+            } else if (draggedHandle === 1) {
+              newX = normalizedHandles[3].x;
+              newY = newMouseY;
+              newWidth = newMouseX - normalizedHandles[3].x;
+              newHeight = normalizedHandles[3].y - newMouseY;
+            } else if (draggedHandle === 2) {
+              newX = normalizedHandles[0].x;
+              newY = normalizedHandles[0].y;
+              newWidth = newMouseX - normalizedHandles[0].x;
+              newHeight = newMouseY - normalizedHandles[0].y;
+            } else if (draggedHandle === 3) {
+              newX = newMouseX;
+              newY = normalizedHandles[1].y;
+              newWidth = normalizedHandles[1].x - newMouseX;
+              newHeight = newMouseY - normalizedHandles[1].y;
             }
 
-            if (selectedObject.x !== newX || selectedObject.y !== newY) {
-              selectedObject.x = newMouseX;
-              selectedObject.y = newMouseY;
+            if (
+              selectedObject.x !== newX ||
+              selectedObject.y !== newY ||
+              selectedObject.width !== newWidth ||
+              selectedObject.height !== newHeight
+            ) {
+              selectedObject.x = newX;
+              selectedObject.y = newY;
               selectedObject.width = newWidth;
               selectedObject.height = newHeight;
               updateObjects();
