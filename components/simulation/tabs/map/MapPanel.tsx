@@ -160,6 +160,10 @@ export default function LoadPanel() {
     }
   }, [onPointerMove, onPointerDown, onPointerUp]);
 
+  const updateObjects = useCallback(() => {
+    setObjects((value) => value.map((obj) => obj.clone()));
+  }, [setObjects]);
+
   // Move objecs
   useEffect(() => {
     if (!canvas.current) return;
@@ -172,22 +176,45 @@ export default function LoadPanel() {
           setStartDragTargetPos({ x: selectedObject.x, y: selectedObject.y });
         } else {
           // Calculate new position
-          let newX =
+          let newMouseX =
             startDragTargetPos.x + (normalizedMouse.x - startDragMousePos.x);
-          let newY =
+          let newMouseY =
             startDragTargetPos.y + (normalizedMouse.y - startDragMousePos.y);
           // Round the new position
-          newX = Math.round(newX * worldSize) / worldSize;
-          newY = Math.round(newY * worldSize) / worldSize;
+          newMouseX = Math.round(newMouseX * worldSize) / worldSize;
+          newMouseY = Math.round(newMouseY * worldSize) / worldSize;
 
           if (draggedHandle != undefined) {
-            console.log(draggedHandle);
-          } else {
+            const normalizedHandles = getHandles(selectedObject);
+
+            let newX = 0;
+            let newY = 0;
+            let newWidth = 0;
+            let newHeight = 0;
+
+            if (draggedHandle === 0) {
+              newX = newMouseX;
+              newY = newMouseY;
+              newWidth = normalizedHandles[2].x - newX;
+              newHeight = normalizedHandles[2].y - newY;
+            }
+
             if (selectedObject.x !== newX || selectedObject.y !== newY) {
+              selectedObject.x = newMouseX;
+              selectedObject.y = newMouseY;
+              selectedObject.width = newWidth;
+              selectedObject.height = newHeight;
+              updateObjects();
+            }
+          } else {
+            if (
+              selectedObject.x !== newMouseX ||
+              selectedObject.y !== newMouseY
+            ) {
               // Only apply it if there were any change
-              selectedObject.x = newX;
-              selectedObject.y = newY;
-              setObjects(objects.map((obj) => obj.clone()));
+              selectedObject.x = newMouseX;
+              selectedObject.y = newMouseY;
+              updateObjects();
             }
           }
         }
@@ -240,6 +267,7 @@ export default function LoadPanel() {
     setObjects,
     startDragMousePos,
     startDragTargetPos,
+    updateObjects,
     worldSize,
   ]);
 
