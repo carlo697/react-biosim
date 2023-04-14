@@ -19,6 +19,18 @@ type Coordinates = {
   y: number;
 };
 
+const HANDLE_SIZE = 10;
+
+function getHandles(obj: WorldObject): Coordinates[] {
+  const normalizedHandles = [
+    { x: obj.x, y: obj.y },
+    { x: obj.x + obj.width, y: obj.y },
+    { x: obj.x + obj.width, y: obj.y + obj.height },
+    { x: obj.x, y: obj.y + obj.height },
+  ];
+  return normalizedHandles;
+}
+
 function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
   context.strokeStyle = "black";
   context.lineWidth = 3;
@@ -42,10 +54,10 @@ function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
     context.fillStyle = "white";
     context.beginPath();
     context.rect(
-      context.canvas.width * handle.x - 5,
-      context.canvas.height * handle.y - 5,
-      10,
-      10
+      context.canvas.width * handle.x - HANDLE_SIZE / 2,
+      context.canvas.height * handle.y - HANDLE_SIZE / 2,
+      HANDLE_SIZE,
+      HANDLE_SIZE
     );
     context.stroke();
     context.fill();
@@ -78,6 +90,9 @@ export default function LoadPanel() {
   const [startDragTargetPos, setStartDragTargetPos] = useState<
     Coordinates | undefined
   >(undefined);
+  const [draggedHandle, setDraggedHandle] = useState<number | undefined>(
+    undefined
+  );
 
   // Draw the objects, outlines and handles
   const draw = useCallback(() => {
@@ -147,17 +162,9 @@ export default function LoadPanel() {
 
   // Move objecs
   useEffect(() => {
-    if (isClicking && selectedObject) {
-      // Start dragging an object
-      if (
-        normalizedMouse.x >= selectedObject.x &&
-        normalizedMouse.x <= selectedObject.x + selectedObject.width &&
-        normalizedMouse.y >= selectedObject.y &&
-        normalizedMouse.y <= selectedObject.y + selectedObject.height
-      ) {
-        setIsDragging(true);
-      }
+    if (!canvas.current) return;
 
+    if (isClicking && selectedObject) {
       if (isDragging) {
         if (!startDragMousePos || !startDragTargetPos) {
           // Save the start position
@@ -173,20 +180,57 @@ export default function LoadPanel() {
           newX = Math.round(newX * worldSize) / worldSize;
           newY = Math.round(newY * worldSize) / worldSize;
 
-          if (selectedObject.x !== newX || selectedObject.y !== newY) {
-            // Only apply it if there were any change
-            selectedObject.x = newX;
-            selectedObject.y = newY;
-            setObjects(objects.map((obj) => obj.clone()));
+          if (draggedHandle != undefined) {
+            console.log(draggedHandle);
+          } else {
+            if (selectedObject.x !== newX || selectedObject.y !== newY) {
+              // Only apply it if there were any change
+              selectedObject.x = newX;
+              selectedObject.y = newY;
+              setObjects(objects.map((obj) => obj.clone()));
+            }
           }
+        }
+      } else {
+        // Check if mouse is inside a handle
+        let targetHandle: undefined | number = undefined;
+        const normalizedHandles = getHandles(selectedObject);
+        const handleNormalizedSize = HANDLE_SIZE / canvas.current.width;
+        for (let index = 0; index < normalizedHandles.length; index++) {
+          const handle = normalizedHandles[index];
+          const xDistance = Math.abs(normalizedMouse.x - handle.x);
+          const yDistance = Math.abs(normalizedMouse.y - handle.y);
+
+          if (
+            xDistance < handleNormalizedSize &&
+            yDistance < handleNormalizedSize
+          ) {
+            targetHandle = index;
+            break;
+          }
+        }
+
+        if (targetHandle != undefined) {
+          setDraggedHandle(targetHandle);
+          setIsDragging(true);
+        } else if (
+          normalizedMouse.x >= selectedObject.x &&
+          normalizedMouse.x <= selectedObject.x + selectedObject.width &&
+          normalizedMouse.y >= selectedObject.y &&
+          normalizedMouse.y <= selectedObject.y + selectedObject.height
+        ) {
+          // Start dragging an object
+          setIsDragging(true);
         }
       }
     } else {
       setIsDragging(false);
       setStartDragMousePos(undefined);
       setStartDragTargetPos(undefined);
+      setDraggedHandle(undefined);
     }
   }, [
+    draggedHandle,
     isClicking,
     isDragging,
     normalizedMouse.x,
