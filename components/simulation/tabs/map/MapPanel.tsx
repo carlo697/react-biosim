@@ -21,6 +21,13 @@ type Coordinates = {
 
 const HANDLE_SIZE = 10;
 
+function roundCoordinates(coordinates: Coordinates, worldSize: number) {
+  return {
+    x: Math.round(coordinates.x * worldSize) / worldSize,
+    y: Math.round(coordinates.y * worldSize) / worldSize,
+  };
+}
+
 function getHandles(obj: WorldObject): Coordinates[] {
   const normalizedHandles = [
     { x: obj.x, y: obj.y },
@@ -170,72 +177,71 @@ export default function LoadPanel() {
           setStartDragMousePos({ x: normalizedMouse.x, y: normalizedMouse.y });
           setStartDragTargetPos({ x: selectedObject.x, y: selectedObject.y });
         } else {
-          // Determine the mouse position relative to the thing being moved
-          let newMouseX;
-          let newMouseY;
-          if (draggedHandle !== undefined) {
-            newMouseX = normalizedMouse.x;
-            newMouseY = normalizedMouse.y;
-          } else {
-            newMouseX =
-              startDragTargetPos.x + (normalizedMouse.x - startDragMousePos.x);
-            newMouseY =
-              startDragTargetPos.y + (normalizedMouse.y - startDragMousePos.y);
-          }
-          // Round the mouse position
-          newMouseX = Math.round(newMouseX * worldSize) / worldSize;
-          newMouseY = Math.round(newMouseY * worldSize) / worldSize;
-
           if (draggedHandle != undefined) {
+            const mousePosition = roundCoordinates(normalizedMouse, worldSize);
             const normalizedHandles = getHandles(selectedObject);
 
-            let newX = 0;
-            let newY = 0;
-            let newWidth = 0;
-            let newHeight = 0;
+            let anchor1 = { x: 0, y: 0 };
+            let anchor2 = { x: 0, y: 0 };
 
             if (draggedHandle === 0) {
-              newX = newMouseX;
-              newY = newMouseY;
-              newWidth = normalizedHandles[2].x - newX;
-              newHeight = normalizedHandles[2].y - newY;
+              anchor1 = { x: mousePosition.x, y: mousePosition.y };
+              anchor2 = {
+                x: normalizedHandles[2].x,
+                y: normalizedHandles[2].y,
+              };
             } else if (draggedHandle === 1) {
-              newX = normalizedHandles[3].x;
-              newY = newMouseY;
-              newWidth = newMouseX - normalizedHandles[3].x;
-              newHeight = normalizedHandles[3].y - newMouseY;
+              anchor1 = { x: normalizedHandles[0].x, y: mousePosition.y };
+              anchor2 = { x: mousePosition.x, y: normalizedHandles[2].y };
             } else if (draggedHandle === 2) {
-              newX = normalizedHandles[0].x;
-              newY = normalizedHandles[0].y;
-              newWidth = newMouseX - normalizedHandles[0].x;
-              newHeight = newMouseY - normalizedHandles[0].y;
+              anchor1 = {
+                x: normalizedHandles[0].x,
+                y: normalizedHandles[0].y,
+              };
+              anchor2 = { x: mousePosition.x, y: mousePosition.y };
             } else if (draggedHandle === 3) {
-              newX = newMouseX;
-              newY = normalizedHandles[1].y;
-              newWidth = normalizedHandles[1].x - newMouseX;
-              newHeight = newMouseY - normalizedHandles[1].y;
+              anchor1 = { x: mousePosition.x, y: normalizedHandles[0].y };
+              anchor2 = { x: normalizedHandles[2].x, y: mousePosition.y };
             }
 
+            const newPosition = { x: anchor1.x, y: anchor1.y };
+            const newSize = {
+              x: anchor2.x - anchor1.x,
+              y: anchor2.y - anchor1.y,
+            };
+
             if (
-              selectedObject.x !== newX ||
-              selectedObject.y !== newY ||
-              selectedObject.width !== newWidth ||
-              selectedObject.height !== newHeight
+              selectedObject.x !== newPosition.x ||
+              selectedObject.y !== newPosition.y ||
+              selectedObject.width !== newSize.x ||
+              selectedObject.height !== newSize.y
             ) {
-              selectedObject.x = newX;
-              selectedObject.y = newY;
-              selectedObject.width = newWidth;
-              selectedObject.height = newHeight;
+              selectedObject.x = newPosition.x;
+              selectedObject.y = newPosition.y;
+              selectedObject.width = newSize.x;
+              selectedObject.height = newSize.y;
               updateObjects();
             }
           } else {
+            const mousePosition = roundCoordinates(
+              {
+                x:
+                  startDragTargetPos.x +
+                  (normalizedMouse.x - startDragMousePos.x),
+                y:
+                  startDragTargetPos.y +
+                  (normalizedMouse.y - startDragMousePos.y),
+              },
+              worldSize
+            );
+
             if (
-              selectedObject.x !== newMouseX ||
-              selectedObject.y !== newMouseY
+              selectedObject.x !== mousePosition.x ||
+              selectedObject.y !== mousePosition.y
             ) {
               // Only apply it if there were any change
-              selectedObject.x = newMouseX;
-              selectedObject.y = newMouseY;
+              selectedObject.x = mousePosition.x;
+              selectedObject.y = mousePosition.y;
               updateObjects();
             }
           }
