@@ -38,6 +38,18 @@ function getHandles(obj: WorldObject): Coordinates[] {
   return normalizedHandles;
 }
 
+function areCoordinatesInsideObject(
+  coordinates: Coordinates,
+  obj: WorldObject
+) {
+  return (
+    coordinates.x >= obj.x &&
+    coordinates.x <= obj.x + obj.width &&
+    coordinates.y >= obj.y &&
+    coordinates.y <= obj.y + obj.height
+  );
+}
+
 function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
   context.strokeStyle = "black";
   context.lineWidth = 3;
@@ -73,7 +85,9 @@ export default function LoadPanel() {
   const { width } = useWindowSize();
   const [worldSize, setWorldSize] = useAtom(painterWorldSizeAtom);
   const [objects, setObjects] = useAtom(painterObjectsAtom);
-  const selectedObjectIndex = useAtomValue(painterSelectedObjectIndexAtom);
+  const [selectedObjectIndex, setSelectedObjectIndex] = useAtom(
+    painterSelectedObjectIndexAtom
+  );
   const selectedObject =
     selectedObjectIndex != undefined ? objects[selectedObjectIndex] : undefined;
 
@@ -169,6 +183,8 @@ export default function LoadPanel() {
   // Move objecs
   useEffect(() => {
     if (!canvas.current) return;
+
+    let startedDragging = false;
 
     if (isClicking && selectedObject) {
       if (isDragging) {
@@ -268,14 +284,13 @@ export default function LoadPanel() {
         if (targetHandle != undefined) {
           setDraggedHandle(targetHandle);
           setIsDragging(true);
+          startedDragging = true;
         } else if (
-          normalizedMouse.x >= selectedObject.x &&
-          normalizedMouse.x <= selectedObject.x + selectedObject.width &&
-          normalizedMouse.y >= selectedObject.y &&
-          normalizedMouse.y <= selectedObject.y + selectedObject.height
+          areCoordinatesInsideObject(normalizedMouse, selectedObject)
         ) {
           // Start dragging an object
           setIsDragging(true);
+          startedDragging = true;
         }
       }
     } else {
@@ -284,15 +299,32 @@ export default function LoadPanel() {
       setStartDragTargetPos(undefined);
       setDraggedHandle(undefined);
     }
+
+    if (isClicking && !isDragging && !startedDragging) {
+      const reversedObjects = [...objects].reverse();
+      for (let index = 0; index < reversedObjects.length; index++) {
+        const obj = reversedObjects[index];
+
+        if (
+          obj !== selectedObject &&
+          areCoordinatesInsideObject(normalizedMouse, obj)
+        ) {
+          setSelectedObjectIndex(objects.indexOf(obj));
+          break;
+        }
+      }
+    }
   }, [
     draggedHandle,
     isClicking,
     isDragging,
+    normalizedMouse,
     normalizedMouse.x,
     normalizedMouse.y,
     objects,
     selectedObject,
     setObjects,
+    setSelectedObjectIndex,
     startDragMousePos,
     startDragTargetPos,
     updateObjects,
