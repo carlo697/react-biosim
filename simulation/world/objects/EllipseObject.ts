@@ -17,7 +17,7 @@ export default class EllipseObject implements WorldObject {
     public width: number,
     public height: number,
     public relative: boolean = true,
-    public drawIndividualPixels: boolean = false,
+    public drawIndividualPixels: boolean = true,
     public color: string = colors.obstacle
   ) {}
 
