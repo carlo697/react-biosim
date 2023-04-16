@@ -11,8 +11,8 @@ import {
   painterWorldSizeAtom,
   painterSelectedObjectIndexAtom,
 } from "../../store/mapPainterAtoms";
-import MapObjectProperties from "./MapObjectProperties";
 import MapPainterHeader from "./MapPainterHeader";
+import MapPainterFooter from "./MapPainterFooter";
 
 type Coordinates = {
   x: number;
@@ -364,12 +364,7 @@ export default function LoadPanel() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
-        <div></div>
-        <div>
-          <MapObjectProperties />
-        </div>
-      </div>
+      <MapPainterFooter />
     </div>
   );
 }
