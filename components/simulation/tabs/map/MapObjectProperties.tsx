@@ -57,6 +57,15 @@ export default function MapObjectProperties() {
     setObjects(objects.filter((_, index) => index !== selectedObjectIndex));
   };
 
+  const handleClone = () => {
+    if (selectedObjectIndex && selectedObject) {
+      const newObjects = [...objects];
+      newObjects.splice(selectedObjectIndex, 0, selectedObject);
+      setObjects(newObjects);
+      setSelectedObjectIndex(selectedObjectIndex + 1);
+    }
+  };
+
   return (
     <div>
       {selectedObject && (
@@ -95,7 +104,10 @@ export default function MapObjectProperties() {
             />
           </div>
 
-          <div className="mt-2 grid grid-cols-2">
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Button onClick={handleClone} variant="grey">
+              Clone
+            </Button>
             <Button onClick={handleDelete}>Delete</Button>
           </div>
         </>
