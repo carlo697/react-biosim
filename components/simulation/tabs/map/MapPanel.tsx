@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import { worldAtom } from "../../store";
 import { useAtom, useAtomValue } from "jotai";
 import WorldObject from "@/simulation/world/WorldObject";
@@ -20,6 +20,24 @@ type Coordinates = {
 };
 
 const HANDLE_SIZE = 10;
+
+function getEventRelativeMousePosition(
+  element: HTMLElement,
+  e: MouseEvent,
+  normalized?: boolean
+) {
+  const canvasRect = element.getBoundingClientRect();
+
+  // Calculate the normalized mouse position relative to the element
+  let x = e.clientX - canvasRect.left;
+  let y = e.clientY - canvasRect.top;
+  if (normalized) {
+    x /= canvasRect.width;
+    y /= canvasRect.height;
+  }
+
+  return { x, y } as Coordinates;
+}
 
 function roundCoordinates(coordinates: Coordinates, worldSize: number) {
   return {
@@ -92,14 +110,22 @@ export default function LoadPanel() {
     selectedObjectIndex != undefined ? objects[selectedObjectIndex] : undefined;
 
   // Mouse interaction
+  const [isMouseDown, setIsMouseDown] = useState(false);
+  const [mousePositionWhenClicked, setNormalizedMouseWhenClicked] =
+    useState<Coordinates>({
+      x: 0,
+      y: 0,
+    });
+  const [normalizedMousePosition, setNormalizedMousePosition] =
+    useState<Coordinates>({
+      x: 0,
+      y: 0,
+    });
   const [isClicking, setIsClicking] = useState(false);
-  const [normalizedMouse, setNormalizedMouse] = useState<Coordinates>({
-    x: 0,
-    y: 0,
-  });
+  const [isDragging, setIsDragging] = useState(false);
 
   // Mouse dragging
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingObject, setIsDraggingObject] = useState(false);
   const [startDragMousePos, setStartDragMousePos] = useState<
     Coordinates | undefined
   >(undefined);
@@ -133,48 +159,64 @@ export default function LoadPanel() {
     }
   }, [objects, selectedObjectIndex, worldSize]);
 
-  const onPointerMove = useCallback((e: MouseEvent) => {
+  const onPointerMove = (e: MouseEvent) => {
+    if (!canvas.current) return;
     e.preventDefault();
 
     if (canvas.current) {
-      const canvasRect = canvas.current.getBoundingClientRect();
+      // Get the normalized position
+      const normalizedPosition = getEventRelativeMousePosition(
+        canvas.current,
+        e,
+        true
+      );
+      setNormalizedMousePosition(normalizedPosition);
 
-      // Calculate the normalized mouse position relative to the canvas
-      const x = (e.clientX - canvasRect.left) / canvasRect.width;
-      const y = (e.clientY - canvasRect.top) / canvasRect.height;
-      setNormalizedMouse({ x, y });
+      if (isMouseDown) {
+        // Get position in pixels
+        const position = getEventRelativeMousePosition(
+          canvas.current,
+          e,
+          false
+        );
+
+        // Measure the distance to the fist click
+        const distanceFromFirstClick = Math.sqrt(
+          Math.pow(position.x - mousePositionWhenClicked.x, 2) +
+            Math.pow(position.y - mousePositionWhenClicked.y, 2)
+        );
+
+        if (distanceFromFirstClick > 6) {
+          setIsDragging(true);
+        }
+      }
     }
-  }, []);
+  };
 
-  const onPointerDown = useCallback((e: MouseEvent) => {
+  const onPointerDown = (e: MouseEvent) => {
+    if (!canvas.current) return;
     e.preventDefault();
 
-    setIsClicking(true);
-  }, []);
+    setIsMouseDown(true);
+    const mousePosition = getEventRelativeMousePosition(canvas.current, e);
+    setNormalizedMouseWhenClicked(mousePosition);
+  };
 
-  const onPointerUp = useCallback((e: MouseEvent) => {
+  const onPointerUp = (e: MouseEvent) => {
+    if (!canvas.current) return;
     e.preventDefault();
 
-    setIsClicking(false);
-  }, []);
+    if (!isDragging) {
+      setIsClicking(true);
+    }
 
-  // Bind canvas events
+    setIsMouseDown(false);
+    setIsDragging(false);
+  };
+
   useEffect(() => {
-    const _canvas = canvas.current;
-    if (_canvas) {
-      _canvas.addEventListener("pointermove", onPointerMove);
-      // _canvas.addEventListener("pointerleave", onPointerUp);
-      _canvas.addEventListener("pointerdown", onPointerDown);
-      _canvas.addEventListener("pointerup", onPointerUp);
-
-      return () => {
-        _canvas.removeEventListener("pointermove", onPointerMove);
-        // _canvas.addEventListener("pointerleave", onPointerUp);
-        _canvas.removeEventListener("pointerdown", onPointerDown);
-        _canvas.removeEventListener("pointerup", onPointerUp);
-      };
-    }
-  }, [onPointerMove, onPointerDown, onPointerUp]);
+    setIsClicking(false);
+  }, [isClicking]);
 
   const updateObjects = useCallback(() => {
     setObjects((value) => value.map((obj) => obj.clone()));
@@ -186,15 +228,21 @@ export default function LoadPanel() {
 
     let startedDragging = false;
 
-    if (isClicking && selectedObject) {
-      if (isDragging) {
+    if (isDragging && selectedObject) {
+      if (isDraggingObject) {
         if (!startDragMousePos || !startDragTargetPos) {
           // Save the start position of the mouse and the object
-          setStartDragMousePos({ x: normalizedMouse.x, y: normalizedMouse.y });
+          setStartDragMousePos({
+            x: normalizedMousePosition.x,
+            y: normalizedMousePosition.y,
+          });
           setStartDragTargetPos({ x: selectedObject.x, y: selectedObject.y });
         } else {
           if (draggedHandle != undefined) {
-            const mousePosition = roundCoordinates(normalizedMouse, worldSize);
+            const mousePosition = roundCoordinates(
+              normalizedMousePosition,
+              worldSize
+            );
             const normalizedHandles = getHandles(selectedObject);
 
             let anchor1 = { x: 0, y: 0 };
@@ -243,10 +291,10 @@ export default function LoadPanel() {
               {
                 x:
                   startDragTargetPos.x +
-                  (normalizedMouse.x - startDragMousePos.x),
+                  (normalizedMousePosition.x - startDragMousePos.x),
                 y:
                   startDragTargetPos.y +
-                  (normalizedMouse.y - startDragMousePos.y),
+                  (normalizedMousePosition.y - startDragMousePos.y),
               },
               worldSize
             );
@@ -269,8 +317,8 @@ export default function LoadPanel() {
         const handleNormalizedSize = HANDLE_SIZE / canvas.current.width;
         for (let index = 0; index < normalizedHandles.length; index++) {
           const handle = normalizedHandles[index];
-          const xDistance = Math.abs(normalizedMouse.x - handle.x);
-          const yDistance = Math.abs(normalizedMouse.y - handle.y);
+          const xDistance = Math.abs(normalizedMousePosition.x - handle.x);
+          const yDistance = Math.abs(normalizedMousePosition.y - handle.y);
 
           if (
             xDistance < handleNormalizedSize &&
@@ -283,31 +331,31 @@ export default function LoadPanel() {
 
         if (targetHandle != undefined) {
           setDraggedHandle(targetHandle);
-          setIsDragging(true);
+          setIsDraggingObject(true);
           startedDragging = true;
         } else if (
-          areCoordinatesInsideObject(normalizedMouse, selectedObject)
+          areCoordinatesInsideObject(normalizedMousePosition, selectedObject)
         ) {
           // Start dragging an object
-          setIsDragging(true);
+          setIsDraggingObject(true);
           startedDragging = true;
         }
       }
     } else {
-      setIsDragging(false);
+      setIsDraggingObject(false);
       setStartDragMousePos(undefined);
       setStartDragTargetPos(undefined);
       setDraggedHandle(undefined);
     }
 
-    if (isClicking && !isDragging && !startedDragging) {
+    if (isClicking && !isDraggingObject && !startedDragging) {
       const reversedObjects = [...objects].reverse();
       for (let index = 0; index < reversedObjects.length; index++) {
         const obj = reversedObjects[index];
 
         if (
           obj !== selectedObject &&
-          areCoordinatesInsideObject(normalizedMouse, obj)
+          areCoordinatesInsideObject(normalizedMousePosition, obj)
         ) {
           setSelectedObjectIndex(objects.indexOf(obj));
           break;
@@ -318,12 +366,10 @@ export default function LoadPanel() {
     draggedHandle,
     isClicking,
     isDragging,
-    normalizedMouse,
-    normalizedMouse.x,
-    normalizedMouse.y,
+    isDraggingObject,
+    normalizedMousePosition,
     objects,
     selectedObject,
-    setObjects,
     setSelectedObjectIndex,
     startDragMousePos,
     startDragTargetPos,
@@ -352,6 +398,9 @@ export default function LoadPanel() {
         <canvas
           className="aspect-square w-full bg-white lg:col-span-2"
           ref={canvas}
+          onPointerMove={onPointerMove}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
         ></canvas>
 
         <div className="w-full overflow-x-hidden overflow-y-scroll px-5 lg:aspect-[1/2]">
