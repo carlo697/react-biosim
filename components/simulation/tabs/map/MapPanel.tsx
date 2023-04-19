@@ -1,9 +1,8 @@
 "use client";
 
-import { MouseEvent, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { worldAtom } from "../../store";
 import { useAtom, useAtomValue } from "jotai";
-import WorldObject from "@/simulation/world/WorldObject";
 import { useWindowSize } from "react-use";
 import MapLayer from "./MapLayer";
 import {
@@ -13,88 +12,14 @@ import {
 } from "../../store/mapPainterAtoms";
 import MapPainterHeader from "./MapPainterHeader";
 import MapPainterFooter from "./MapPainterFooter";
-
-type Coordinates = {
-  x: number;
-  y: number;
-};
-
-const HANDLE_SIZE = 10;
-
-function getEventRelativeMousePosition(
-  element: HTMLElement,
-  e: MouseEvent,
-  normalized?: boolean
-) {
-  const canvasRect = element.getBoundingClientRect();
-
-  // Calculate the normalized mouse position relative to the element
-  let x = e.clientX - canvasRect.left;
-  let y = e.clientY - canvasRect.top;
-  if (normalized) {
-    x /= canvasRect.width;
-    y /= canvasRect.height;
-  }
-
-  return { x, y } as Coordinates;
-}
-
-function roundCoordinates(coordinates: Coordinates, worldSize: number) {
-  return {
-    x: Math.round(coordinates.x * worldSize) / worldSize,
-    y: Math.round(coordinates.y * worldSize) / worldSize,
-  };
-}
-
-function getHandles(obj: WorldObject): Coordinates[] {
-  const normalizedHandles = [
-    { x: obj.x, y: obj.y },
-    { x: obj.x + obj.width, y: obj.y },
-    { x: obj.x + obj.width, y: obj.y + obj.height },
-    { x: obj.x, y: obj.y + obj.height },
-  ];
-  return normalizedHandles;
-}
-
-function areCoordinatesInsideObject(
-  coordinates: Coordinates,
-  obj: WorldObject
-) {
-  return (
-    coordinates.x >= obj.x &&
-    coordinates.x <= obj.x + obj.width &&
-    coordinates.y >= obj.y &&
-    coordinates.y <= obj.y + obj.height
-  );
-}
-
-function drawOutline(context: CanvasRenderingContext2D, obj: WorldObject) {
-  context.strokeStyle = "black";
-  context.lineWidth = 3;
-  context.beginPath();
-  context.rect(
-    context.canvas.width * obj.x,
-    context.canvas.height * obj.y,
-    context.canvas.width * obj.width,
-    context.canvas.height * obj.height
-  );
-  context.stroke();
-
-  // Handles
-  const normalizedHandles = getHandles(obj);
-  normalizedHandles.forEach((handle) => {
-    context.fillStyle = "white";
-    context.beginPath();
-    context.rect(
-      context.canvas.width * handle.x - HANDLE_SIZE / 2,
-      context.canvas.height * handle.y - HANDLE_SIZE / 2,
-      HANDLE_SIZE,
-      HANDLE_SIZE
-    );
-    context.stroke();
-    context.fill();
-  });
-}
+import useMouseClickAndDrag from "@/hooks/useMouseClickAndDrag";
+import { Coordinates, roundCoordinates } from "@/helpers/coordinates";
+import {
+  HANDLE_SIZE,
+  areCoordinatesInsideObject,
+  drawOutline,
+  getHandles,
+} from "@/helpers/worldObjects";
 
 export default function LoadPanel() {
   const world = useAtomValue(worldAtom);
@@ -110,19 +35,8 @@ export default function LoadPanel() {
     selectedObjectIndex != undefined ? objects[selectedObjectIndex] : undefined;
 
   // Mouse interaction
-  const [isMouseDown, setIsMouseDown] = useState(false);
-  const [mousePositionWhenClicked, setNormalizedMouseWhenClicked] =
-    useState<Coordinates>({
-      x: 0,
-      y: 0,
-    });
-  const [normalizedMousePosition, setNormalizedMousePosition] =
-    useState<Coordinates>({
-      x: 0,
-      y: 0,
-    });
-  const [isClicking, setIsClicking] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
+  const { events, normalizedMousePosition, isClicking, isDragging } =
+    useMouseClickAndDrag(canvas);
 
   // Mouse dragging
   const [isDraggingObject, setIsDraggingObject] = useState(false);
@@ -158,65 +72,6 @@ export default function LoadPanel() {
       });
     }
   }, [objects, selectedObjectIndex, worldSize]);
-
-  const onPointerMove = (e: MouseEvent) => {
-    if (!canvas.current) return;
-    e.preventDefault();
-
-    if (canvas.current) {
-      // Get the normalized position
-      const normalizedPosition = getEventRelativeMousePosition(
-        canvas.current,
-        e,
-        true
-      );
-      setNormalizedMousePosition(normalizedPosition);
-
-      if (isMouseDown) {
-        // Get position in pixels
-        const position = getEventRelativeMousePosition(
-          canvas.current,
-          e,
-          false
-        );
-
-        // Measure the distance to the fist click
-        const distanceFromFirstClick = Math.sqrt(
-          Math.pow(position.x - mousePositionWhenClicked.x, 2) +
-            Math.pow(position.y - mousePositionWhenClicked.y, 2)
-        );
-
-        if (distanceFromFirstClick > 6) {
-          setIsDragging(true);
-        }
-      }
-    }
-  };
-
-  const onPointerDown = (e: MouseEvent) => {
-    if (!canvas.current) return;
-    e.preventDefault();
-
-    setIsMouseDown(true);
-    const mousePosition = getEventRelativeMousePosition(canvas.current, e);
-    setNormalizedMouseWhenClicked(mousePosition);
-  };
-
-  const onPointerUp = (e: MouseEvent) => {
-    if (!canvas.current) return;
-    e.preventDefault();
-
-    if (!isDragging) {
-      setIsClicking(true);
-    }
-
-    setIsMouseDown(false);
-    setIsDragging(false);
-  };
-
-  useEffect(() => {
-    setIsClicking(false);
-  }, [isClicking]);
 
   const updateObjects = useCallback(() => {
     setObjects((value) => value.map((obj) => obj.clone()));
@@ -398,9 +253,7 @@ export default function LoadPanel() {
         <canvas
           className="aspect-square w-full bg-white lg:col-span-2"
           ref={canvas}
-          onPointerMove={onPointerMove}
-          onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
+          {...events}
         ></canvas>
 
         <div className="w-full overflow-x-hidden overflow-y-scroll px-5 lg:aspect-[1/2]">
