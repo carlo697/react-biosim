@@ -59,7 +59,7 @@ export default function MapObjectProperties() {
   }, [objects, selectedObjectIndex, setObjects, setSelectedObjectIndex]);
 
   const handleClone = () => {
-    if (selectedObjectIndex && selectedObject) {
+    if (selectedObjectIndex !== undefined && selectedObject) {
       const newObjects = [...objects];
       newObjects.splice(selectedObjectIndex, 0, selectedObject.clone());
       setObjects(newObjects);
