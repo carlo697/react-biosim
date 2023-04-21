@@ -8,6 +8,7 @@ import {
   painterSelectedObjectIndexAtom,
 } from "../../store/mapPainterAtoms";
 import Button from "@/components/global/Button";
+import { useCallback, useEffect } from "react";
 
 export default function MapObjectProperties() {
   const [objects, setObjects] = useAtom(painterObjectsAtom);
@@ -52,10 +53,10 @@ export default function MapObjectProperties() {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     setSelectedObjectIndex(undefined);
     setObjects(objects.filter((_, index) => index !== selectedObjectIndex));
-  };
+  }, [objects, selectedObjectIndex, setObjects, setSelectedObjectIndex]);
 
   const handleClone = () => {
     if (selectedObjectIndex && selectedObject) {
@@ -65,6 +66,22 @@ export default function MapObjectProperties() {
       setSelectedObjectIndex(selectedObjectIndex + 1);
     }
   };
+
+  const deleteHandler = useCallback(
+    ({ key }: KeyboardEvent) => {
+      if (key === "Delete") {
+        handleDelete();
+      }
+    },
+    [handleDelete]
+  );
+
+  useEffect(() => {
+    window.addEventListener("keyup", deleteHandler);
+    return () => {
+      window.removeEventListener("keyup", deleteHandler);
+    };
+  }, [deleteHandler]);
 
   return (
     <div>
