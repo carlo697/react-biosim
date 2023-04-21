@@ -1,8 +1,7 @@
 import EllipseObject from "../../objects/EllipseObject";
-import World from "../../World";
-import HealthArea from "./HealthArea";
+import HealthAreaMixin from "./HealthArea";
 
-export default class EllipseHealthArea extends HealthArea(EllipseObject) {
+export default class EllipseHealthArea extends HealthAreaMixin(EllipseObject) {
   constructor(
     x: number,
     y: number,

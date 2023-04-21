@@ -9,6 +9,7 @@ import {
 } from "../../store/mapPainterAtoms";
 import Button from "@/components/global/Button";
 import { useCallback, useEffect } from "react";
+import { HealthArea } from "@/simulation/world/areas/health/HealthArea";
 
 export default function MapObjectProperties() {
   const [objects, setObjects] = useAtom(painterObjectsAtom);
@@ -19,6 +20,12 @@ export default function MapObjectProperties() {
   const selectedObject =
     selectedObjectIndex !== undefined
       ? objects[selectedObjectIndex]
+      : undefined;
+
+  const castedHealthArea = selectedObject as HealthArea;
+  const selectedHealthArea =
+    selectedObject && "health" in castedHealthArea
+      ? castedHealthArea
       : undefined;
 
   const update = () => {
@@ -49,6 +56,13 @@ export default function MapObjectProperties() {
   const updateHeight = (value: number) => {
     if (selectedObject && !isNaN(value)) {
       selectedObject.height = value;
+      update();
+    }
+  };
+
+  const updateHealth = (value: number) => {
+    if (selectedHealthArea && !isNaN(value)) {
+      selectedHealthArea.health = value;
       update();
     }
   };
@@ -120,6 +134,17 @@ export default function MapObjectProperties() {
               step={0.01}
             />
           </div>
+
+          {selectedHealthArea && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <NumberInput
+                label="Health"
+                value={selectedHealthArea.health}
+                onChange={updateHealth}
+                step={0.25}
+              />
+            </div>
+          )}
 
           <div className="mt-2 grid grid-cols-2 gap-2">
             <Button onClick={handleClone} variant="grey">

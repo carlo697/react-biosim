@@ -10,6 +10,8 @@ import {
 import EllipseObject from "@/simulation/world/objects/EllipseObject";
 import RectangleReproductionArea from "@/simulation/world/areas/reproduction/RectangleReproductionArea";
 import EllipseReproductionArea from "@/simulation/world/areas/reproduction/EllipseReproductionArea";
+import RectangleHealthArea from "@/simulation/world/areas/health/RectangleHealthArea";
+import EllipseHealthArea from "@/simulation/world/areas/health/EllipseHealthArea";
 
 const defaultX = 0;
 const defaultY = 0;
@@ -52,6 +54,30 @@ const addPresets: Record<string, MapPainterAddObjectPreset> = {
         defaultHeight
       ),
   },
+  rectangleHealth: {
+    name: "Rectangle Health",
+    create: () =>
+      new RectangleHealthArea(
+        defaultX,
+        defaultY,
+        defaultWidth,
+        defaultHeight,
+        true,
+        1
+      ),
+  },
+  ellipseHealth: {
+    name: "Ellipse Health",
+    create: () =>
+      new EllipseHealthArea(
+        defaultX,
+        defaultY,
+        defaultWidth,
+        defaultHeight,
+        true,
+        1
+      ),
+  },
 };
 
 export default function MapPainterFooter() {
@@ -75,7 +101,7 @@ export default function MapPainterFooter() {
           ))}
         </SelectInput>
       </div>
-      
+
       <div>
         <MapObjectProperties />
       </div>

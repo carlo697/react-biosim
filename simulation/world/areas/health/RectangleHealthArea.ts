@@ -1,8 +1,9 @@
 import RectangleObject from "../../objects/RectangleObject";
-import World from "../../World";
-import HealthArea from "./HealthArea";
+import HealthAreaMixin from "./HealthArea";
 
-export default class RectangleHealthArea extends HealthArea(RectangleObject) {
+export default class RectangleHealthArea extends HealthAreaMixin(
+  RectangleObject
+) {
   constructor(
     x: number,
     y: number,

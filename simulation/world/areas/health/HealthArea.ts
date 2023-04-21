@@ -4,8 +4,14 @@ import WorldObject from "../../WorldObject";
 
 type WorldObjectType = new (...args: any[]) => WorldObject;
 
-export default function HealthArea<TBase extends WorldObjectType>(Base: TBase) {
-  return class HealthAreaMixin extends Base implements WorldObject {
+export interface HealthArea extends WorldObject {
+  health: number;
+}
+
+export default function HealthAreaMixin<TBase extends WorldObjectType>(
+  Base: TBase
+) {
+  return class HealthAreaMixin extends Base implements WorldObject, HealthArea {
     health: number = 0;
     areaType = 1;
     color = colors.healing;
