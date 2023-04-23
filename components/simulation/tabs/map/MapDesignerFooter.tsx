@@ -1,12 +1,12 @@
 import SelectInput from "@/components/global/inputs/SelectInput";
-import MapObjectProperties from "./MapObjectProperties";
+import MapDesignerLayerProperties from "./MapDesignerLayerProperties";
 import WorldObject from "@/simulation/world/WorldObject";
 import RectangleObject from "@/simulation/world/objects/RectangleObject";
 import { useAtom, useSetAtom } from "jotai";
 import {
-  painterObjectsAtom,
-  painterSelectedObjectIndexAtom,
-} from "../../store/mapPainterAtoms";
+  mapDesignerObjectsAtom,
+  mapDesignerSelectedObjectIndexAtom,
+} from "../../store/mapDesignerAtoms";
 import EllipseObject from "@/simulation/world/objects/EllipseObject";
 import RectangleReproductionArea from "@/simulation/world/areas/reproduction/RectangleReproductionArea";
 import EllipseReproductionArea from "@/simulation/world/areas/reproduction/EllipseReproductionArea";
@@ -80,9 +80,9 @@ const addPresets: Record<string, MapPainterAddObjectPreset> = {
   },
 };
 
-export default function MapPainterFooter() {
-  const [objects, setObjects] = useAtom(painterObjectsAtom);
-  const setSelectedIndex = useSetAtom(painterSelectedObjectIndexAtom);
+export default function MapDesignerFooter() {
+  const [objects, setObjects] = useAtom(mapDesignerObjectsAtom);
+  const setSelectedIndex = useSetAtom(mapDesignerSelectedObjectIndexAtom);
 
   const handleSelect = (value: string) => {
     setObjects([...objects, addPresets[value].create()]);
@@ -102,9 +102,7 @@ export default function MapPainterFooter() {
         </SelectInput>
       </div>
 
-      <div>
-        <MapObjectProperties />
-      </div>
+      <MapDesignerLayerProperties />
     </div>
   );
 }

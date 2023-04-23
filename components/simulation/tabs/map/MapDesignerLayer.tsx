@@ -5,31 +5,28 @@ import { useAtom, useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef } from "react";
 import { useWindowSize } from "react-use";
 import {
-  painterWorldSizeAtom,
-  painterSelectedObjectIndexAtom,
-  painterObjectsAtom,
-} from "../../store/mapPainterAtoms";
+  mapDesignerWorldSizeAtom,
+  mapDesignerSelectedObjectIndexAtom,
+  mapDesignerObjectsAtom,
+} from "../../store/mapDesignerAtoms";
 import classNames from "classnames";
 import { AiOutlineCaretDown, AiOutlineCaretUp } from "react-icons/ai";
+import { getName } from "@/helpers/worldObjects";
 
 interface Props {
   index: number;
   obj: WorldObject;
 }
 
-export function getName(obj: Object) {
-  return Object.getPrototypeOf(obj).constructor.name;
-}
-
 const upDownButtonClassnames = "h-1/2 px-0.5 hover:brightness-75 bg-grey-mid";
 
-export default function MapLayer({ index, obj }: Props) {
-  const worldSize = useAtomValue(painterWorldSizeAtom);
+export default function MapDesignerLayer({ index, obj }: Props) {
+  const worldSize = useAtomValue(mapDesignerWorldSizeAtom);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [selectedObjectIndex, setSelectedObjectIndex] = useAtom(
-    painterSelectedObjectIndexAtom
+    mapDesignerSelectedObjectIndexAtom
   );
-  const [objects, setObjects] = useAtom(painterObjectsAtom);
+  const [objects, setObjects] = useAtom(mapDesignerObjectsAtom);
 
   const draw = useCallback(() => {
     if (canvas.current) {

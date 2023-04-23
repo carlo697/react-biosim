@@ -4,15 +4,15 @@ import Button from "@/components/global/Button";
 import { useAtom, useAtomValue } from "jotai";
 import { worldAtom } from "../../store";
 import {
-  painterObjectsAtom,
-  painterWorldSizeAtom,
-} from "../../store/mapPainterAtoms";
+  mapDesignerObjectsAtom,
+  mapDesignerWorldSizeAtom,
+} from "../../store/mapDesignerAtoms";
 
-export default function MapPainterHeader() {
+export default function MapDesignerHeader() {
   const world = useAtomValue(worldAtom);
 
-  const [worldSize, setWorldSize] = useAtom(painterWorldSizeAtom);
-  const [objects, setObjects] = useAtom(painterObjectsAtom);
+  const [worldSize, setWorldSize] = useAtom(mapDesignerWorldSizeAtom);
+  const [objects, setObjects] = useAtom(mapDesignerObjectsAtom);
 
   const handleUse = () => {
     if (world) {

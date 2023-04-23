@@ -1,20 +1,20 @@
 "use client";
 
-import { getName } from "./MapLayer";
 import NumberInput from "@/components/global/inputs/NumberInput";
 import { useAtom } from "jotai";
 import {
-  painterObjectsAtom,
-  painterSelectedObjectIndexAtom,
-} from "../../store/mapPainterAtoms";
+  mapDesignerObjectsAtom,
+  mapDesignerSelectedObjectIndexAtom,
+} from "../../store/mapDesignerAtoms";
 import Button from "@/components/global/Button";
 import { useCallback, useEffect } from "react";
 import { HealthArea } from "@/simulation/world/areas/health/HealthArea";
+import { getName } from "@/helpers/worldObjects";
 
-export default function MapObjectProperties() {
-  const [objects, setObjects] = useAtom(painterObjectsAtom);
+export default function MapDesignerLayerProperties() {
+  const [objects, setObjects] = useAtom(mapDesignerObjectsAtom);
   const [selectedObjectIndex, setSelectedObjectIndex] = useAtom(
-    painterSelectedObjectIndexAtom
+    mapDesignerSelectedObjectIndexAtom
   );
 
   const selectedObject =
