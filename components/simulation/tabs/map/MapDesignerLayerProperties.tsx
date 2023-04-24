@@ -10,6 +10,7 @@ import Button from "@/components/global/Button";
 import { useCallback, useEffect } from "react";
 import { HealthArea } from "@/simulation/world/areas/health/HealthArea";
 import { getName } from "@/helpers/worldObjects";
+import { FaClone, FaTrash } from "react-icons/fa";
 
 export default function MapDesignerLayerProperties() {
   const [objects, setObjects] = useAtom(mapDesignerObjectsAtom);
@@ -147,10 +148,12 @@ export default function MapDesignerLayerProperties() {
           )}
 
           <div className="mt-2 grid grid-cols-2 gap-2">
-            <Button onClick={handleClone} variant="grey">
+            <Button onClick={handleClone} variant="grey" icon={<FaClone />}>
               Clone
             </Button>
-            <Button onClick={handleDelete}>Delete</Button>
+            <Button onClick={handleDelete} icon={<FaTrash />}>
+              Delete
+            </Button>
           </div>
         </>
       )}

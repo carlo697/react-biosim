@@ -9,6 +9,8 @@ import {
   mapDesignerWorldSizeAtom,
 } from "../../store/mapDesignerAtoms";
 import { BsArrowsFullscreen, BsFullscreenExit } from "react-icons/bs";
+import { FaTrash } from "react-icons/fa";
+import { TfiCheckBox } from "react-icons/tfi";
 
 export default function MapDesignerHeader() {
   const world = useAtomValue(worldAtom);
@@ -43,10 +45,12 @@ export default function MapDesignerHeader() {
 
   return (
     <div className="flex items-center justify-start gap-2">
-      <Button variant="grey" onClick={handleUse}>
+      <Button variant="grey" onClick={handleUse} icon={<TfiCheckBox />}>
         Use Map
       </Button>
-      <Button onClick={handleReset}>Reset Designer</Button>
+      <Button onClick={handleReset} icon={<FaTrash />}>
+        Reset Designer
+      </Button>
 
       <Button
         onClick={handleFullscreen}
