@@ -3,6 +3,7 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import MapDesignerLayer from "./MapDesignerLayer";
 import {
+  mapDesignerFullscreenAtom,
   mapDesignerObjectsAtom,
   mapDesignerWorldSizeAtom,
 } from "../../store/mapDesignerAtoms";
@@ -11,8 +12,11 @@ import MapDesignerFooter from "./MapDesignerFooter";
 import MapDesignerCanvas from "./MapDesignerCanvas";
 import { useEffect } from "react";
 import { worldAtom } from "../../store";
+import ToggleableFullscreen from "@/components/global/ToggleableFullscreen";
+import classNames from "classnames";
 
 export default function MapDesigner() {
+  const isFullscreen = useAtomValue(mapDesignerFullscreenAtom);
   const world = useAtomValue(worldAtom);
   const setWorldSize = useSetAtom(mapDesignerWorldSizeAtom);
   const [objects, setObjects] = useAtom(mapDesignerObjectsAtom);
@@ -26,23 +30,27 @@ export default function MapDesigner() {
   }, [setObjects, setWorldSize, world]);
 
   return (
-    <>
-      <MapDesignerHeader />
+    <ToggleableFullscreen enable={isFullscreen} className="bg-grey-dark">
+      <div className={classNames(isFullscreen && "section-container xl:px-36 2xl:px-60 py-6")}>
+        <div className="flex flex-col gap-5 ">
+          <MapDesignerHeader />
 
-      <div className="grid lg:grid-cols-3">
-        <MapDesignerCanvas />
+          <div className="grid lg:grid-cols-3">
+            <MapDesignerCanvas />
 
-        <div className="w-full overflow-x-hidden overflow-y-scroll px-5 lg:aspect-[1/2]">
-          <h3 className="mb-1 text-2xl font-bold">Objects</h3>
-          <div className="flex flex-col gap-1">
-            {objects.map((obstacle, index) => (
-              <MapDesignerLayer key={index} index={index} obj={obstacle} />
-            ))}
+            <div className="w-full overflow-x-hidden overflow-y-scroll px-5 lg:aspect-[1/2]">
+              <h3 className="mb-1 text-2xl font-bold">Objects</h3>
+              <div className="flex flex-col gap-1">
+                {objects.map((obstacle, index) => (
+                  <MapDesignerLayer key={index} index={index} obj={obstacle} />
+                ))}
+              </div>
+            </div>
           </div>
+
+          <MapDesignerFooter />
         </div>
       </div>
-
-      <MapDesignerFooter />
-    </>
+    </ToggleableFullscreen>
   );
 }
