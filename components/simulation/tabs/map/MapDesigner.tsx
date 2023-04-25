@@ -31,7 +31,11 @@ export default function MapDesigner() {
 
   return (
     <ToggleableFullscreen enable={isFullscreen} className="bg-grey-dark">
-      <div className={classNames(isFullscreen && "section-container xl:px-36 2xl:px-60 py-6")}>
+      <div
+        className={classNames(
+          isFullscreen && "section-container py-6 xl:px-36 2xl:px-60"
+        )}
+      >
         <div className="flex flex-col gap-5 ">
           <MapDesignerHeader />
 
