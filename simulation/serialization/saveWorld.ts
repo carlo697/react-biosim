@@ -7,15 +7,9 @@ import SavedWorldObject from "./data/SavedWorldObject";
 import generationRegistryFormatter from "./formatters/generationRegistryFormatter";
 import objectFormatters from "./formatters/objectFormatters";
 
-export function saveWorld(world: World): SavedWorld {
-  const sensors: SensorName[] = Object.entries(world.sensors.data)
-    .filter(([_, { enabled }]) => enabled)
-    .map(([key]) => key as SensorName);
-  const actions: ActionName[] = Object.entries(world.actions.data)
-    .filter(([_, { enabled }]) => enabled)
-    .map(([key]) => key as ActionName);
-
+export function saveSpecies(world: World) {
   const creatureMap = new Map<string, SavedSpecies>();
+
   // Create the species from the creature list
   for (
     let creatureIdx = 0;
@@ -46,8 +40,12 @@ export function saveWorld(world: World): SavedWorld {
     (a, b) => b.creatures.length - a.creatures.length
   );
 
-  // Save objects
+  return species;
+}
+
+export function saveObjects(world: World) {
   const objects: SavedWorldObject[] = [];
+
   for (let objectIndex = 0; objectIndex < world.objects.length; objectIndex++) {
     const obj = world.objects[objectIndex];
 
@@ -65,6 +63,23 @@ export function saveWorld(world: World): SavedWorld {
       objects.push(item);
     }
   }
+
+  return objects;
+}
+
+export function saveWorld(world: World): SavedWorld {
+  const sensors: SensorName[] = Object.entries(world.sensors.data)
+    .filter(([_, { enabled }]) => enabled)
+    .map(([key]) => key as SensorName);
+  const actions: ActionName[] = Object.entries(world.actions.data)
+    .filter(([_, { enabled }]) => enabled)
+    .map(([key]) => key as ActionName);
+
+  // Create the final array of species
+  const species = saveSpecies(world);
+
+  // Save objects
+  const objects = saveObjects(world);
 
   // Save generation registry
   const generations = generationRegistryFormatter.serialize(
