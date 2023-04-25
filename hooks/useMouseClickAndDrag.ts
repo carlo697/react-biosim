@@ -1,5 +1,3 @@
-"use client";
-
 import { Coordinates } from "@/helpers/coordinates";
 import { getEventRelativeMousePosition } from "@/helpers/mouse";
 import { MouseEvent, useEffect, useState } from "react";

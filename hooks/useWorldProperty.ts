@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useState } from "react";
 import { worldAtom } from "@/components/simulation/store";
 import World from "@/simulation/world/World";

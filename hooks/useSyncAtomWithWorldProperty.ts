@@ -1,5 +1,3 @@
-"use client";
-
 import { worldAtom } from "@/components/simulation/store";
 import World from "@/simulation/world/World";
 import { PrimitiveAtom, useAtom, useAtomValue } from "jotai";
