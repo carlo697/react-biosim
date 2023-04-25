@@ -8,6 +8,7 @@ import {
   mapDesignerObjectsAtom,
   mapDesignerWorldSizeAtom,
   mapDesignerSelectedObjectIndexAtom,
+  mapDesignerFullscreenAtom,
 } from "../../store/mapDesignerAtoms";
 import useMouseClickAndDrag from "@/hooks/useMouseClickAndDrag";
 import { Coordinates, roundCoordinates } from "@/helpers/coordinates";
@@ -21,6 +22,7 @@ import {
 export default function MapDesignerCanvas() {
   const world = useAtomValue(worldAtom);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const isFullscreen = useAtomValue(mapDesignerFullscreenAtom);
 
   const { width } = useWindowSize();
   const worldSize = useAtomValue(mapDesignerWorldSizeAtom);
@@ -232,7 +234,7 @@ export default function MapDesignerCanvas() {
   // Draw the map
   useEffect(() => {
     draw();
-  }, [draw, world, width]);
+  }, [draw, world, width, isFullscreen]);
 
   return (
     <canvas
