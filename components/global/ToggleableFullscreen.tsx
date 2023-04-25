@@ -1,4 +1,6 @@
+import useDisableBodyScroll from "@/hooks/useDisableBodyScroll";
 import classNames from "classnames";
+import { useEffect } from "react";
 
 interface Props
   extends React.PropsWithChildren,
@@ -12,8 +14,14 @@ export default function ToggleableFullscreen({
   enable,
   ...rest
 }: Props) {
+  const { setIsScrollDisabled } = useDisableBodyScroll();
+
+  useEffect(() => {
+    setIsScrollDisabled(!!enable);
+  }, [enable, setIsScrollDisabled]);
+
   const finalClassName = classNames(
-    enable && "fixed w-full h-full top-0 left-0 z-50 overflow-y-auto",
+    enable && "fixed w-full h-full top-0 left-0 z-50 overflow-y-scroll",
     className
   );
 

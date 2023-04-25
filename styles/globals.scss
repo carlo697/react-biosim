@@ -5,8 +5,12 @@
 @layer base {
   :root {
     @apply break-words;
+
+    &.lock-scroll {
+      @apply overflow-y-hidden;
+    }
   }
-  
+
   a {
     @apply underline underline-offset-2;
   }
