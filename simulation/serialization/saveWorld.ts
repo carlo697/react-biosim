@@ -6,8 +6,9 @@ import SavedWorld from "./data/SavedWorld";
 import SavedWorldObject from "./data/SavedWorldObject";
 import generationRegistryFormatter from "./formatters/generationRegistryFormatter";
 import objectFormatters from "./formatters/objectFormatters";
+import WorldObject from "../world/WorldObject";
 
-export function saveSpecies(world: World) {
+export function serializeSpecies(world: World) {
   const creatureMap = new Map<string, SavedSpecies>();
 
   // Create the species from the creature list
@@ -43,11 +44,11 @@ export function saveSpecies(world: World) {
   return species;
 }
 
-export function saveObjects(world: World) {
-  const objects: SavedWorldObject[] = [];
+export function serializeObjects(objects: WorldObject[]) {
+  const serializedObjects: SavedWorldObject[] = [];
 
-  for (let objectIndex = 0; objectIndex < world.objects.length; objectIndex++) {
-    const obj = world.objects[objectIndex];
+  for (let objectIndex = 0; objectIndex < objects.length; objectIndex++) {
+    const obj = objects[objectIndex];
 
     // Find the formatter
     const className: string = Object.getPrototypeOf(obj).constructor.name;
@@ -60,11 +61,11 @@ export function saveObjects(world: World) {
         data,
         type: className,
       };
-      objects.push(item);
+      serializedObjects.push(item);
     }
   }
 
-  return objects;
+  return serializedObjects;
 }
 
 export function saveWorld(world: World): SavedWorld {
@@ -76,10 +77,10 @@ export function saveWorld(world: World): SavedWorld {
     .map(([key]) => key as ActionName);
 
   // Create the final array of species
-  const species = saveSpecies(world);
+  const species = serializeSpecies(world);
 
   // Save objects
-  const objects = saveObjects(world);
+  const objects = serializeObjects(world.objects);
 
   // Save generation registry
   const generations = generationRegistryFormatter.serialize(

@@ -9,9 +9,9 @@ import SavedWorldObject from "./data/SavedWorldObject";
 import generationRegistryFormatter from "./formatters/generationRegistryFormatter";
 import objectFormatters from "./formatters/objectFormatters";
 
-export function loadSpecies(world: World, species: SavedSpecies[]) {
+export function deserializeSpecies(world: World, species: SavedSpecies[]) {
   const deserializedCreatures: Creature[] = [];
-  
+
   species.forEach((savedSpecies) => {
     savedSpecies.creatures.forEach((savedCreature) => {
       const genome: Genome = new Genome(savedSpecies.genes);
@@ -26,7 +26,7 @@ export function loadSpecies(world: World, species: SavedSpecies[]) {
   return deserializedCreatures;
 }
 
-export function loadObjects(world: World, objects: SavedWorldObject[]) {
+export function deserializeObjects(objects: SavedWorldObject[]) {
   // Clear world objects
   const deserializedObjects: WorldObject[] = [];
 
@@ -35,10 +35,7 @@ export function loadObjects(world: World, objects: SavedWorldObject[]) {
     const formatter = objectFormatters[savedObject.type];
 
     if (formatter) {
-      const worldObject: WorldObject = formatter.deserialize(
-        savedObject.data,
-        world
-      );
+      const worldObject: WorldObject = formatter.deserialize(savedObject.data);
       deserializedObjects.push(worldObject);
     }
   });
@@ -81,10 +78,10 @@ export function loadWorld(world: World, data: string) {
   world.actions.loadFromList(parsed.actions);
 
   // Load creatures
-  world.currentCreatures = loadSpecies(world, parsed.species);
+  world.currentCreatures = deserializeSpecies(world, parsed.species);
 
   // Load objects
-  world.objects = loadObjects(world, parsed.objects);
+  world.objects = deserializeObjects(parsed.objects);
 
   // Load generation registry
   if (parsed.generations) {

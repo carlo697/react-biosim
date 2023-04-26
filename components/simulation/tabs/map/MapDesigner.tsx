@@ -10,24 +10,45 @@ import {
 import MapDesignerHeader from "./MapDesignerHeader";
 import MapDesignerFooter from "./MapDesignerFooter";
 import MapDesignerCanvas from "./MapDesignerCanvas";
-import { useEffect } from "react";
 import { worldAtom } from "../../store";
 import ToggleableFullscreen from "@/components/global/ToggleableFullscreen";
 import classNames from "classnames";
+import { useEffectOnce, useInterval } from "react-use";
+import useSavedMap from "./useSavedMap";
 
 export default function MapDesigner() {
   const isFullscreen = useAtomValue(mapDesignerFullscreenAtom);
+
   const world = useAtomValue(worldAtom);
-  const setWorldSize = useSetAtom(mapDesignerWorldSizeAtom);
+  const [worldSize, setWorldSize] = useAtom(mapDesignerWorldSizeAtom);
   const [objects, setObjects] = useAtom(mapDesignerObjectsAtom);
 
-  // Initialize this component with values from the world
-  useEffect(() => {
+  // Load objects from local storage
+  const { savedObjects, setSavedObjects, savedWorldSize, setSavedWorldSize } =
+    useSavedMap();
+
+  // Initialize this component with values from the world or the local storage
+  useEffectOnce(() => {
     if (world) {
-      setWorldSize(world.size);
-      setObjects(world.objects.map((obj) => obj.clone()));
+      if (savedObjects) {
+        setObjects([...savedObjects]);
+      } else {
+        setObjects(world.objects.map((obj) => obj.clone()));
+      }
+
+      if (savedWorldSize) {
+        setWorldSize(savedWorldSize);
+      } else {
+        setWorldSize(world.size);
+      }
     }
-  }, [setObjects, setWorldSize, world]);
+  });
+
+  // Save the objects every 1 seconds
+  useInterval(() => {
+    setSavedObjects(objects);
+    setWorldSize(worldSize);
+  }, 1000);
 
   return (
     <ToggleableFullscreen enable={isFullscreen} className="bg-grey-dark">
