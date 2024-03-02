@@ -4,6 +4,8 @@ import World, { colors } from "../World";
 import WorldObject from "../WorldObject";
 
 export default class MovingRectangleObstacle implements WorldObject {
+  name = "MovingRectangleObstacle";
+
   pixels: [number, number][] = [];
 
   absoluteX: number = 0;
@@ -34,7 +36,7 @@ export default class MovingRectangleObstacle implements WorldObject {
   clone(): WorldObject {
     throw new Error("Method not implemented.");
   }
-  
+
   areaType?: number | undefined;
   areaEffectOnCreature?(creature: Creature): void {
     throw new Error("Method not implemented.");
