@@ -81,7 +81,9 @@ export default function SettingsPanel() {
     name.replace(/([A-Z])/g, " $1").trim();
 
   const getSensorLabel = (sensor: Sensor) =>
-    `${getPrettyName(sensor.name)} (${sensor.neuronCount} neurons)`;
+    `${getPrettyName(sensor.name)} (${sensor.neuronCount} ${
+      sensor.neuronCount == 1 ? "neuron" : "neurons"
+    })`;
 
   const getActionLabel = (action: Action) =>
     `${getPrettyName(action.name)} (1 neuron)`;
