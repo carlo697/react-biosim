@@ -4,11 +4,13 @@ import NumberInput from "@/components/global/inputs/NumberInput";
 import {
   enabledActionsAtom,
   enabledSensorsAtom,
+  geneInsertionDeletionProbabilityAtom,
   initialGenomeSizeAtom,
   initialPopulationAtom,
   maxGenomeSizeAtom,
   maxNeuronsAtom,
   mutationModeAtom,
+  mutationProbabilityAtom,
   worldAtom,
   worldSizeAtom,
 } from "../../store";
@@ -49,7 +51,17 @@ export default function SettingsPanel() {
     maxNeuronsAtom,
     (world) => world.maxNumberNeurons
   );
+
   useSyncAtomWithWorldProperty(mutationModeAtom, (world) => world.mutationMode);
+  useSyncAtomWithWorldProperty(
+    mutationProbabilityAtom,
+    (world) => world.mutationProbability
+  );
+  useSyncAtomWithWorldProperty(
+    geneInsertionDeletionProbabilityAtom,
+    (world) => world.geneInsertionDeletionProbability
+  );
+
   useSyncAtomWithWorldProperty(
     enabledSensorsAtom,
     (world) => world.sensors.getList(),
@@ -108,18 +120,34 @@ export default function SettingsPanel() {
 
         <div>
           <h3 className="mb-1 text-2xl font-bold">Neuronal Networks</h3>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <NumberInput
               atom={initialGenomeSizeAtom}
               label="Initial genome size"
             />
             <NumberInput atom={maxGenomeSizeAtom} label="Max genome size" />
             <NumberInput atom={maxNeuronsAtom} label="Max neurons" />
+          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-1 text-2xl font-bold">Mutations</h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <SelectInput atom={mutationModeAtom} label="Mutation mode">
               <option value="wholeGene">Whole Genes</option>
               <option value="singleBit">Single Bits</option>
               <option value="singleHexDigit">Single Hexadecimal Digits</option>
             </SelectInput>
+            <NumberInput
+              atom={mutationProbabilityAtom}
+              label="Mutation probability (0 - 1)"
+              step={0.001}
+            />
+            <NumberInput
+              atom={geneInsertionDeletionProbabilityAtom}
+              label="Gene insertion/deletion probability (0 - 1)"
+              step={0.001}
+            />
           </div>
         </div>
 

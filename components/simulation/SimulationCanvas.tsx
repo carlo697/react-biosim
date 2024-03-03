@@ -10,11 +10,13 @@ import React, { useCallback, useEffect, useRef } from "react";
 import {
   enabledActionsAtom,
   enabledSensorsAtom,
+  geneInsertionDeletionProbabilityAtom,
   initialGenomeSizeAtom,
   initialPopulationAtom,
   maxGenomeSizeAtom,
   maxNeuronsAtom,
   mutationModeAtom,
+  mutationProbabilityAtom,
   restartAtom,
   worldAtom,
   worldSizeAtom,
@@ -37,6 +39,10 @@ export default function SimulationCanvas({ className }: Props) {
   const maxGenomeSize = useAtomValue(maxGenomeSizeAtom);
   const maxNeurons = useAtomValue(maxNeuronsAtom);
   const mutationMode = useAtomValue(mutationModeAtom);
+  const mutationProbability = useAtomValue(mutationProbabilityAtom);
+  const geneInsertionDeletionProbability = useAtomValue(
+    geneInsertionDeletionProbabilityAtom
+  );
   const enabledSensors = useAtomValue(enabledSensorsAtom);
   const enabledActions = useAtomValue(enabledActionsAtom);
 
@@ -62,8 +68,8 @@ export default function SimulationCanvas({ className }: Props) {
 
       // Mutations
       world.mutationMode = mutationMode;
-      world.mutationProbability = 0.05;
-      world.geneInsertionDeletionProbability = 0.015;
+      world.mutationProbability = mutationProbability;
+      world.geneInsertionDeletionProbability = geneInsertionDeletionProbability;
       world.deletionRatio = 0.5;
     },
     [
@@ -74,6 +80,8 @@ export default function SimulationCanvas({ className }: Props) {
       maxGenomeSize,
       maxNeurons,
       mutationMode,
+      mutationProbability,
+      geneInsertionDeletionProbability,
       worldSize,
     ]
   );
