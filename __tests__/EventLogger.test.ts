@@ -60,8 +60,11 @@ describe('EventLogger', () => {
         }
         //const worldControllerData = testWorldControllerData;
         //const worldGenerationsData = testWorldGenerationsData;
-        simulationData = SIMULATION_DATA_DEFAULT;
-        simulationData.constants.mockSimulationDataConstants;
+        // use the mock log constants (LOG_LEVEL CREATURE) without mutating the shared defaults
+        simulationData = {
+            ...SIMULATION_DATA_DEFAULT,
+            constants: { ...SIMULATION_DATA_DEFAULT.constants, ...mockSimulationDataConstants },
+        };
         worldControllerMock = new WorldController(simulationData);
         logger = new EventLogger(worldControllerMock, 10);
         worldControllerMock.currentGen = 1;
@@ -80,7 +83,7 @@ describe('EventLogger', () => {
     test('pause() - should not log an event if paused', () => {
         logger.pause();
         logger.logEvent(mockEvent);
-        expect(logger.getLog().includes('value1')).toBeFalsy;
+        expect(logger.logCount).toBe(0);
     });
 
     test('resume() after resume can log events', () => {
@@ -451,7 +454,7 @@ describe('EventLogger', () => {
         worldControllerMock.currentGen = 1;
         worldControllerMock.currentStep = 1;
         logger.logEvent({...mockEvent, creatureId: 201});               // +1 creature event
-        expect(logger.isPaused).toBeTruthy;
+        expect(logger.isPaused).toBeTruthy();
         console.log("recordFirsttGeneration() - log only first generation for partial generation when extintion\n\n", logger.getLog());
         expect(logger.logCount).toBe(5);                            //  1 step + 4 creatures, could not record gen stats
 
