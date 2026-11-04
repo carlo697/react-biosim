@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import { ReactNode } from "react";
 
 interface Props
@@ -17,7 +17,7 @@ export default function Button({
 }: Props) {
   const onlyIcon = icon && !children;
 
-  const finalClassName = classNames(
+  const finalClassName = clsx(
     "flex-center gap-2 text-sm lg:text-base hover:brightness-90 rounded-md",
     !onlyIcon && "py-1 px-3 lg:py-2 lg:px-4",
     onlyIcon && "p-1 lg:p-2 aspect-square",

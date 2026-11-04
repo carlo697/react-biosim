@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import { atom as newAtom, useAtom } from "jotai";
 import { useContext, useState } from "react";
 import { toggleGroupContext } from "./ToggleGroup";
@@ -20,7 +20,7 @@ export default function Toggle({
   const [currentAtomValue, setAtomValue] = useAtom(atom ?? defaultAtom);
   const isActive = (value ?? currentAtomValue) === targetValue;
 
-  const finalClassName = classNames(
+  const finalClassName = clsx(
     "py-2 px-2 text-sm lg:text-sm !leading-none",
     "hover:border-2 hover:border-white/50",
     "first:rounded-tl-md first:rounded-bl-md",

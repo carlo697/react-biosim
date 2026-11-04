@@ -7,7 +7,7 @@ import FooterStats from "./FooterStats";
 import { FooterSpeedControls } from "./FooterSpeedControls";
 import { FaChevronUp } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa";
-import classNames from "classnames";
+import clsx from "clsx";
 import useWorldPropertyValue from "@/hooks/useWorldPropertyValue";
 
 export default function Footer() {
@@ -29,7 +29,7 @@ export default function Footer() {
 
         <div className="flex items-center gap-2 sm:gap-10">
           <div
-            className={classNames(
+            className={clsx(
               (stepsPerGeneration < 100 && "min-w-[40px]") ||
                 (stepsPerGeneration < 1000 && "min-w-[55px]") ||
                 (stepsPerGeneration < 10000 && "min-w-[70px]")
@@ -62,7 +62,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className={classNames("xl:hidden", !extended && "hidden")}>
+        <div className={clsx("xl:hidden", !extended && "hidden")}>
           <FooterSpeedControls />
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useAtomValue } from "jotai";
 import { worldAtom } from "../../store";
 import { useCallback, useEffect, useState } from "react";
 import { WorldEvents } from "@/simulation/events/WorldEvents";
-import classNames from "classnames";
+import clsx from "clsx";
 import { Species } from "./Species";
 import SelectedSpecies from "./SelectedSpecies";
 import SpeciesButton from "./SpeciesButton";
@@ -160,7 +160,7 @@ export default function PopulationPanel() {
         </div>
 
         <div
-          className={classNames(
+          className={clsx(
             "inline-grid shrink-0 overflow-y-auto pr-2 lg:grid-cols-2 2xl:grid-cols-3",
             "h-fit max-h-[75vh] lg:max-h-[65vh]"
           )}

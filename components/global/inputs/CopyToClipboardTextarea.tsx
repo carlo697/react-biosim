@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import { PropsWithChildren, useRef } from "react";
 import { FaClipboard } from "react-icons/fa";
 import TextareaAutosize, {
@@ -32,7 +32,7 @@ export default function CopyToClipboardTextarea({
   return (
     <div className="relative">
       <TextareaAutosize
-        className={classNames(
+        className={clsx(
           "word-spacing-md w-full resize-none bg-grey-mid p-3 text-xs",
           withScrollbar && "overflow-y-auto overflow-x-hidden"
         )}
@@ -41,7 +41,7 @@ export default function CopyToClipboardTextarea({
         {...rest}
       />
       <button
-        className={classNames(
+        className={clsx(
           "m-1 aspect-square rounded-md bg-blue px-2 leading-none text-white",
           "absolute right-0 top-0",
           "hover:brightness-75",

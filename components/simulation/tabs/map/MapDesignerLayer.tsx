@@ -9,7 +9,7 @@ import {
   mapDesignerSelectedObjectIndexAtom,
   mapDesignerObjectsAtom,
 } from "../../store/mapDesignerAtoms";
-import classNames from "classnames";
+import clsx from "clsx";
 import { AiOutlineCaretDown, AiOutlineCaretUp } from "react-icons/ai";
 
 interface Props {
@@ -17,7 +17,7 @@ interface Props {
   obj: WorldObject;
 }
 
-const upDownButtonClassnames = "h-1/2 px-0.5 hover:brightness-75 bg-grey-mid";
+const upDownButtonclsx = "h-1/2 px-0.5 hover:brightness-75 bg-grey-mid";
 
 export default function MapDesignerLayer({ index, obj }: Props) {
   const worldSize = useAtomValue(mapDesignerWorldSizeAtom);
@@ -68,7 +68,7 @@ export default function MapDesignerLayer({ index, obj }: Props) {
 
   return (
     <div
-      className={classNames(
+      className={clsx(
         "relative overflow-hidden border-2 bg-grey-mid",
         selectedObjectIndex === index ? "border-white" : "border-transparent"
       )}
@@ -82,7 +82,7 @@ export default function MapDesignerLayer({ index, obj }: Props) {
       <div className="absolute right-0 top-0 flex h-full flex-col bg-grey-mid">
         {index > 0 && (
           <button
-            className={upDownButtonClassnames}
+            className={upDownButtonclsx}
             onClick={() => handleMoveLayer(-1)}
           >
             <AiOutlineCaretUp />
@@ -91,7 +91,7 @@ export default function MapDesignerLayer({ index, obj }: Props) {
 
         {index < objects.length - 1 && (
           <button
-            className={upDownButtonClassnames}
+            className={upDownButtonclsx}
             onClick={() => handleMoveLayer(1)}
           >
             <AiOutlineCaretDown />

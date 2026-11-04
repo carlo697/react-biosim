@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import { Atom, PrimitiveAtom, WritableAtom, atom } from "jotai";
 import React from "react";
 import { createContext } from "react";
@@ -22,7 +22,7 @@ export function ToggleGroup({
   onChange,
   ...rest
 }: Props) {
-  const finalClassName = classNames(
+  const finalClassName = clsx(
     "inline-grid auto-cols-fr grid-flow-col",
     className
   );

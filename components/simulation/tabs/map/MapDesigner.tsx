@@ -12,7 +12,7 @@ import MapDesignerFooter from "./MapDesignerFooter";
 import MapDesignerCanvas from "./MapDesignerCanvas";
 import { worldAtom } from "../../store";
 import ToggleableFullscreen from "@/components/global/ToggleableFullscreen";
-import classNames from "classnames";
+import clsx from "clsx";
 import { useEffectOnce, useInterval } from "react-use";
 import useSavedMap from "./useSavedMap";
 
@@ -53,7 +53,7 @@ export default function MapDesigner() {
   return (
     <ToggleableFullscreen enable={isFullscreen} className="bg-grey-dark">
       <div
-        className={classNames(
+        className={clsx(
           isFullscreen && "section-container py-6 xl:px-36 2xl:px-60"
         )}
       >

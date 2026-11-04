@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import { PropsWithChildren, useRef } from "react";
 import { FaClipboard } from "react-icons/fa";
 import TextareaAutosize, {
@@ -14,7 +14,7 @@ export default function TextareaInput({ children, ...rest }: Props) {
   return (
     <div className="relative">
       <TextareaAutosize
-        className={classNames(
+        className={clsx(
           "word-spacing-md word w-full resize-none bg-grey-mid p-3 text-xs"
         )}
         {...rest}

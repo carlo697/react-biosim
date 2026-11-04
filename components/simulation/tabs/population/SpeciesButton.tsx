@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import clsx from "clsx";
 import { Species } from "./Species";
 
 interface Props {
@@ -11,9 +11,9 @@ export default function SpeciesButton({ species, isSelected, onClick }: Props) {
   const { genome, creatures } = species;
 
   return (
-    <div className={classNames("p-0.5", isSelected && "bg-white")}>
+    <div className={clsx("p-0.5", isSelected && "bg-white")}>
       <button
-        className={classNames(
+        className={clsx(
           "h-10 w-10",
           isSelected && "border-2 border-white"
         )}

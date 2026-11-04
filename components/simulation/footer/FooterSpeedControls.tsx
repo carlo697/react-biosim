@@ -1,7 +1,7 @@
 import React from "react";
 import { ToggleGroup } from "@/components/global/ToggleGroup";
 import Toggle from "@/components/global/Toggle";
-import classNames from "classnames";
+import clsx from "clsx";
 import useWorldProperty from "@/hooks/useWorldProperty";
 
 interface Props
@@ -9,7 +9,7 @@ interface Props
     React.ComponentPropsWithoutRef<"div"> {}
 
 export function FooterSpeedControls({ className, ...rest }: Props) {
-  const finalClassName = classNames(
+  const finalClassName = clsx(
     "flex flex-wrap gap-4 text-xs lg:text-sm",
     className
   );
