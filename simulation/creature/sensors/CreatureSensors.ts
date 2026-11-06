@@ -176,7 +176,7 @@ export default class CreatureSensors {
     }
 
     // VerticalSpeed
-    if (this.data.VerticalPosition.enabled) {
+    if (this.data.VerticalSpeed.enabled) {
       values.push((creature.position[1] - creature.lastPosition[1] + 1) / 2);
     }
 
