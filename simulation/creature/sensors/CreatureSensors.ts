@@ -11,6 +11,14 @@ const adjacentTilesLookup: [number, number][] = [
   [-1, 0],
 ];
 
+// Top, Right, Bottom, Left
+const touchDirectionsLookup: [number, number][] = [
+  [0, -1],
+  [1, 0],
+  [0, 1],
+  [-1, 0],
+];
+
 export type SensorName =
   | "HorizontalPosition"
   | "VerticalPosition"
@@ -174,7 +182,7 @@ export default class CreatureSensors {
 
     const horizontalDistance = Math.min(
       creature.position[0],
-      creature.world.size - creature.position[0]
+      creature.world.size - creature.position[0],
     );
     // HorizontalBorderDistance
     if (this.data.HorizontalBorderDistance.enabled) {
@@ -183,7 +191,7 @@ export default class CreatureSensors {
 
     const verticalDistance = Math.min(
       creature.position[1],
-      creature.world.size - creature.position[1]
+      creature.world.size - creature.position[1],
     );
     // VerticalBorderDistance
     if (this.data.VerticalBorderDistance.enabled) {
@@ -194,45 +202,30 @@ export default class CreatureSensors {
     if (this.data.BorderDistance.enabled) {
       values.push(
         (Math.min(horizontalDistance, verticalDistance) / creature.world.size) *
-          2
+          2,
       );
     }
 
-    //Touch
+    // Touch
     if (this.data.Touch.enabled) {
-      // Outputs: 0.0 -> empty, 1.0 -> creature or solid cell
+      // Outputs: 0.0 -> empty, 1.0 -> creature, solid cell or world border
+      for (const [dx, dy] of touchDirectionsLookup) {
+        const x = creature.position[0] + dx;
+        const y = creature.position[1] + dy;
 
-      // Top
-      let x = creature.position[0];
-      let y = creature.position[1] - 1;
-      let tile;
-      if (y >= 0) {
-        tile = creature.world.grid[x][y];
-        values.push(tile.creature || tile.isSolid ? 1.0 : 0);
-      }
+        const isOutside =
+          x < 0 ||
+          y < 0 ||
+          x >= creature.world.size ||
+          y >= creature.world.size;
 
-      // Right
-      x = creature.position[0] + 1;
-      y = creature.position[1];
-      if (x < creature.world.size) {
-        tile = creature.world.grid[x][y];
-        values.push(tile.creature || tile.isSolid ? 1.0 : 0);
-      }
-
-      // Bottom
-      x = creature.position[0];
-      y = creature.position[1] + 1;
-      if (y < creature.world.size) {
-        tile = creature.world.grid[x][y];
-        values.push(tile.creature || tile.isSolid ? 1.0 : 0);
-      }
-
-      // Left
-      x = creature.position[0] - 1;
-      y = creature.position[1];
-      if (x >= 0) {
-        tile = creature.world.grid[x][y];
-        values.push(tile.creature || tile.isSolid ? 1.0 : 0);
+        if (isOutside) {
+          // The world border counts as touching something
+          values.push(1.0);
+        } else {
+          const tile = creature.world.grid[x][y];
+          values.push(tile.creature || tile.isSolid ? 1.0 : 0);
+        }
       }
     }
 
