@@ -145,14 +145,19 @@ export default class CreatureSensors {
   calculateOutputs(creature: Creature): number[] {
     const values: number[] = [];
 
+    // Largest tile index, so positions map exactly to -1..1 with 0 at the center
+    const maxTileIndex = Math.max(1, creature.world.size - 1);
+
     // HorizontalPosition
+    // Outputs: -1 -> west border, 0 -> center, 1 -> east border
     if (this.data.HorizontalPosition.enabled) {
-      values.push(creature.position[0] / creature.world.size);
+      values.push((creature.position[0] / maxTileIndex) * 2 - 1);
     }
 
     // VerticalPosition
+    // Outputs: -1 -> north border, 0 -> center, 1 -> south border
     if (this.data.VerticalPosition.enabled) {
-      values.push(creature.position[1] / creature.world.size);
+      values.push((creature.position[1] / maxTileIndex) * 2 - 1);
     }
 
     // Age
@@ -161,8 +166,9 @@ export default class CreatureSensors {
     }
 
     // Oscillator
+    // Outputs: sine wave between -1 and 1
     if (this.data.Oscillator.enabled) {
-      values.push((Math.sin(creature.world.currentStep / 10) + 1) / 2);
+      values.push(Math.sin(creature.world.currentStep / 10));
     }
 
     // Random
@@ -171,13 +177,15 @@ export default class CreatureSensors {
     }
 
     // HorizontalSpeed
+    // Outputs: -1 -> moved west, 0 -> no horizontal movement, 1 -> moved east
     if (this.data.HorizontalSpeed.enabled) {
-      values.push((creature.position[0] - creature.lastPosition[0] + 1) / 2);
+      values.push(creature.position[0] - creature.lastPosition[0]);
     }
 
     // VerticalSpeed
+    // Outputs: -1 -> moved north, 0 -> no vertical movement, 1 -> moved south
     if (this.data.VerticalSpeed.enabled) {
-      values.push((creature.position[1] - creature.lastPosition[1] + 1) / 2);
+      values.push(creature.position[1] - creature.lastPosition[1]);
     }
 
     const horizontalDistance = Math.min(
