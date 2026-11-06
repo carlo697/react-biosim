@@ -32,7 +32,7 @@ export function serializeSpecies(world: World) {
     species.creatures.push({
       lastMovement: creature.lastMovement,
       lastPosition: creature.lastPosition,
-      position: creature.lastPosition,
+      position: creature.position,
     });
   }
 
